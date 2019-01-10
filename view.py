@@ -8,16 +8,16 @@ __author__ = "Julien Dubois"
 __version__ = "0.1.0"
 
 import os
-import collection
+import collections
 
 
 class View(object):
     def __init__(self):
-        self.widgets = collection.OrderedDict()
+        self.widgets = collections.OrderedDict()
         self.layout = None
 
     def load_layout(self, template_path):
-        template = read_json()
+        template = read_json(template_path)
         if template == None:
             print("[WARNING] [View.load_layout] None template")
         else:

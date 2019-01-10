@@ -8,7 +8,6 @@ __author__ = "Julien Dubois"
 __version__ = "0.1.0"
 
 from os.path import join
-import collection
 
 
 class Activity(object):

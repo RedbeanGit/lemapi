@@ -4,18 +4,17 @@ __author__ = "Julien Dubois"
 __version = "0.1.0"
 
 from os.path import join
-from enumeration import Enum
 
 
-class App(Enum):
+class App(object):
     NAME = "Lem Launcher"
 
 
-class Path(Enum):
+class Path(object):
     DATA = "data"
-    IMAGES = join(Path.DATA, "images")
-    GUI = join(Path.IMAGES, "gui")
-    VIEWS = join(Path.DATA, "views")
+    IMAGES = join(DATA, "images")
+    GUI = join(IMAGES, "gui")
+    VIEWS = join(DATA, "views")
     GAMES = join("/", "home", "pi", "games")
 
 

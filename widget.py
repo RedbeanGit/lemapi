@@ -22,105 +22,105 @@ from pygame.locals import MOUSEMOTION, MOUSEBUTTONDOWN, MOUSEBUTTONUP
 
 class Widget:
 
-    DEFAULT_KWARGS = {
-        "size": [1, 1],
-        "anchor": (-1, -1)
-    }
+	DEFAULT_KWARGS = {
+		"size": [1, 1],
+		"anchor": (-1, -1)
+	}
 
-    def __init__(self, gui, pos, **kwargs):
-        Widget.updateDefaultKwargs(kwargs)
-        self.gui = gui
-        self.pos = pos
-        self.isDestroyed = False
-        self.kwargs = dict(kwargs)
+	def __init__(self, gui, pos, **kwargs):
+		Widget.updateDefaultKwargs(kwargs)
+		self.gui = gui
+		self.pos = pos
+		self.isDestroyed = False
+		self.kwargs = dict(kwargs)
 
-    @classmethod
-    def updateDefaultKwargs(cls, kwargs):
-        for key, value in cls.DEFAULT_KWARGS.items():
-            if key not in kwargs:
-                kwargs[key] = value
+	@classmethod
+	def updateDefaultKwargs(cls, kwargs):
+		for key, value in cls.DEFAULT_KWARGS.items():
+			if key not in kwargs:
+				kwargs[key] = value
 
-    def update(self, deltaTime):
-        pass
+	def update(self, deltaTime):
+		pass
 
-    def onEvent(self, event):
-        pass
+	def onEvent(self, event):
+		pass
 
-    def config(self, **kwargs):
-        for key, value in kwargs.items():
-            self.kwargs[key] = value
+	def config(self, **kwargs):
+		for key, value in kwargs.items():
+			self.kwargs[key] = value
 
-    def getRealPos(self):
-        x, y = self.pos
-        w, h = self.kwargs["size"]
-        ax, ay = self.kwargs["anchor"]
+	def getRealPos(self):
+		x, y = self.pos
+		w, h = self.kwargs["size"]
+		ax, ay = self.kwargs["anchor"]
 
-        return (int(x - w * (ax + 1) / 2), int(y - h * (ay + 1) / 2))
+		return (int(x - w * (ax + 1) / 2), int(y - h * (ay + 1) / 2))
 
-    def isInWidget(self, pos):
-        px, py = pos
-        x, y = self.getRealPos()
-        w, h = self.kwargs["size"]
+	def isInWidget(self, pos):
+		px, py = pos
+		x, y = self.getRealPos()
+		w, h = self.kwargs["size"]
 
-        return px >= x and px <= x + w and py >= y and py <= y + y
+		return px >= x and px <= x + w and py >= y and py <= y + y
 
-    def destroy(self):
-        self.isDestroyed = True
+	def destroy(self):
+		self.isDestroyed = True
 
 
 class Text(Widget):
 
-    DEFAULT_KWARGS = {
-        "fontSize": 20,
-        "font": join(Path.GUI, "font.ttf"),
+	DEFAULT_KWARGS = {
+		"fontSize": 20,
+		"font": join(Path.GUI, "font.ttf"),
 
-        "bold": False,
-        "wide": False,
-        "italic": False,
-        "underline": False,
-        "verticalMode": False,
+		"bold": False,
+		"wide": False,
+		"italic": False,
+		"underline": False,
+		"verticalMode": False,
 
-        "textColor": (255, 255, 255, 255),
-        "backgroundColor": None
-    }
+		"textColor": (255, 255, 255, 255),
+		"backgroundColor": None
+	}
 
-    def __init__(self, gui, pos, text, **kwargs):
-        Text.updateDefaultKwargs(kwargs)
-        Widget.__init__(self, gui, pos, **kwargs)
-        self.text = text
-        self.createFont()
+	def __init__(self, gui, pos, text, **kwargs):
+		Text.updateDefaultKwargs(kwargs)
+		Widget.__init__(self, gui, pos, **kwargs)
+		self.text = text
+		self.createFont()
 
-    def createFont(self):
-        self.font = pygame.freetype.Font(self.kwargs["font"])
-        kwargs = dict(self.kwargs)
-        kwargs.pop("font")
-        self.config(**kwargs)
+	def createFont(self):
+		self.font = pygame.freetype.Font(self.kwargs["font"])
+		kwargs = dict(self.kwargs)
+		kwargs.pop("font")
+		self.config(**kwargs)
 
-    def update(self, deltaTime):
-        surface, rect = self.font.render(self.text, bgcolor=self.kwargs["backgroundColor"])
-        self.kwargs["size"] = (rect.width, rect.height)
-        self.gui.draw_image(surface, self.getRealPos())
-        Widget.update(self, deltaTime)
+	def update(self, deltaTime):
+		surface, rect = self.font.render(self.text, bgcolor=self.kwargs["backgroundColor"])
+		self.kwargs["size"] = (rect.width, rect.height)
+		self.gui.draw_image(surface, self.getRealPos())
+		Widget.update(self, deltaTime)
 
-    def config(self, **kwargs):
-        Widget.config(self, **kwargs)
-        if "font" in  kwargs:
-            self.createFont()
-        else:
-            if "fontSize" in kwargs:
-                self.font.size = kwargs["fontSize"]
-            if "bold" in kwargs:
-                self.font.strong = kwargs["bold"]
-            if "wide" in kwargs:
-                self.font.wide = kwargs["wide"]
-            if "italic" in kwargs:
-                self.font.oblique = kwargs["italic"]
-            if "underline" in kwargs:
-                self.font.underline = kwargs["underline"]
-            if "verticalMode" in kwargs:
-                self.font.vertical = kwargs["verticalMode"]
-            if "textColor" in kwargs:
-                self.font.fgcolor = kwargs["textColor"]
+	def config(self, **kwargs):
+		Widget.config(self, **kwargs)
+		if "font" in  kwargs:
+			self.createFont()
+		else:
+			if "fontSize" in kwargs:
+				self.font.size = kwargs["fontSize"]
+			if "bold" in kwargs:
+				self.font.strong = kwargs["bold"]
+			if "wide" in kwargs:
+				self.font.wide = kwargs["wide"]
+			if "italic" in kwargs:
+				self.font.oblique = kwargs["italic"]
+			if "underline" in kwargs:
+				self.font.underline = kwargs["underline"]
+			if "verticalMode" in kwargs:
+				self.font.vertical = kwargs["verticalMode"]
+			if "textColor" in kwargs:
+				self.font.fgcolor = kwargs["textColor"]
 
 
 class Eventable_widget(Widget):
@@ -392,101 +392,101 @@ class Button(Eventable_widget):
 
 
 class Clickable_text(Text, Eventable_widget):
-    """ Clickable text widget """
+	""" Clickable text widget """
 
-    DEFAULT_KWARGS = {
-        "onClickTextColor": (200, 200, 200, 255),
-        "onMiddleClickTextColor": (100, 100, 100, 255),
-        "onRightClickTextColor": (220, 220, 220, 255),
-        "onHoverTextColor": (230, 230, 230, 255),
-        "disableTextColor": (240, 240, 240, 235)
-    }
+	DEFAULT_KWARGS = {
+		"onClickTextColor": (200, 200, 200, 255),
+		"onMiddleClickTextColor": (100, 100, 100, 255),
+		"onRightClickTextColor": (220, 220, 220, 255),
+		"onHoverTextColor": (230, 230, 230, 255),
+		"disableTextColor": (240, 240, 240, 235)
+	}
 
-    def __init__(self, gui, pos, text, **kwargs):
-        Clickable_text.updateDefaultKwargs(kwargs)
-        Text.__init__(self, gui, pos, text, **kwargs)
-        Eventable_widget.__init__(self, gui, pos, **self.kwargs)
+	def __init__(self, gui, pos, text, **kwargs):
+		Clickable_text.updateDefaultKwargs(kwargs)
+		Text.__init__(self, gui, pos, text, **kwargs)
+		Eventable_widget.__init__(self, gui, pos, **self.kwargs)
 
-    def update(self, deltaTime):
-        if not self.kwargs["enable"]:
-            self.font.fgcolor = self.kwargs["disableTextColor"]
-        elif self.clicked:
-            self.font.fgcolor = self.kwargs["onClickTextColor"]
-        elif self.rightClicked:
-            self.font.fgcolor = self.kwargs["onRightClickTextColor"]
-        elif self.middleClicked:
-            self.font.fgcolor = self.kwargs["onMiddleClickTextColor"]
-        elif self.hovered:
-            self.font.fgcolor = self.kwargs["onHoverTextColor"]
-        else:
-            self.font.fgcolor = self.kwargs["textColor"]
-        Text.update(self, deltaTime)
+	def update(self, deltaTime):
+		if not self.kwargs["enable"]:
+			self.font.fgcolor = self.kwargs["disableTextColor"]
+		elif self.clicked:
+			self.font.fgcolor = self.kwargs["onClickTextColor"]
+		elif self.rightClicked:
+			self.font.fgcolor = self.kwargs["onRightClickTextColor"]
+		elif self.middleClicked:
+			self.font.fgcolor = self.kwargs["onMiddleClickTextColor"]
+		elif self.hovered:
+			self.font.fgcolor = self.kwargs["onHoverTextColor"]
+		else:
+			self.font.fgcolor = self.kwargs["textColor"]
+		Text.update(self, deltaTime)
 
 
 class Image_widget(Widget):
 
-    DEFAULT_KWARGS = {
-        "size": (0, 0)
-    }
+	DEFAULT_KWARGS = {
+		"size": (0, 0)
+	}
 
-    def __init__(self, gui, pos, imagePath, **kwargs):
-        """
-        Initialize a new Image_widget object.
+	def __init__(self, gui, pos, imagePath, **kwargs):
+		"""
+		Initialize a new Image_widget object.
 
-        :type activity: gui.activity.Activity
-        :param activity: The parent activity of this widget.
+		:type activity: gui.activity.Activity
+		:param activity: The parent activity of this widget.
 
-        :type pos: tuple
-        :param pos: The position of the widget in a (x, y) tuple, where x and y
-            are integers.
-        """
+		:type pos: tuple
+		:param pos: The position of the widget in a (x, y) tuple, where x and y
+			are integers.
+		"""
 
-        Image_widget.updateDefaultKwargs(kwargs)
-        Widget.__init__(self, gui, pos, **kwargs)
-        tmp_size = self.kwargs["size"]
-        self.loadImage(imagePath)
+		Image_widget.updateDefaultKwargs(kwargs)
+		Widget.__init__(self, gui, pos, **kwargs)
+		tmp_size = self.kwargs["size"]
+		self.loadImage(imagePath)
 
-        if tmp_size != (0, 0):
-            self.resize(tmp_size)
+		if tmp_size != (0, 0):
+			self.resize(tmp_size)
 
-    def loadImage(self, imagePath):
-        """
-        Load an image file to this object.
+	def loadImage(self, imagePath):
+		"""
+		Load an image file to this object.
 
-        :type imagePath: str
-        :param imagePath: The filepath to the image to load.
-        """
+		:type imagePath: str
+		:param imagePath: The filepath to the image to load.
+		"""
 
-        self.image = self.gui.get_image(imagePath)
-        self.kwargs["size"] = self.image.get_size()
+		self.image = self.gui.get_image(imagePath)
+		self.kwargs["size"] = self.image.get_size()
 
-    def update(self, deltaTime):
-        """
-        Redraw the image on the game window.
-        This method should be called each frame.
+	def update(self, deltaTime):
+		"""
+		Redraw the image on the game window.
+		This method should be called each frame.
 
-        :type deltaTime: float
-        :param deltaTime: Time elapsed since the last call of this method (in
-            seconds)
-        """
-        self.gui.draw_image(self.image, self.getRealPos())
+		:type deltaTime: float
+		:param deltaTime: Time elapsed since the last call of this method (in
+			seconds)
+		"""
+		self.gui.draw_image(self.image, self.getRealPos())
 
-    def resize(self, newSize):
-        """
-        Resize the widget by stretching the image.
+	def resize(self, newSize):
+		"""
+		Resize the widget by stretching the image.
 
-        :type newSize: tuple
-        :param newSize: The size to give to the widget in a (width, height)
-            tuple, where width and height are integers.
-        """
+		:type newSize: tuple
+		:param newSize: The size to give to the widget in a (width, height)
+			tuple, where width and height are integers.
+		"""
 
-        self.image = resizeImage(self.image, newSize)
-        self.kwargs["size"] = tuple(newSize)
+		self.image = resizeImage(self.image, newSize)
+		self.kwargs["size"] = tuple(newSize)
 
-    def config(self, **kwargs):
-        Widget.config(self, **kwargs)
-        if "size" in kwargs:
-            self.resize(kwargs["size"])
+	def config(self, **kwargs):
+		Widget.config(self, **kwargs)
+		if "size" in kwargs:
+			self.resize(kwargs["size"])
 
 
 class Menu_widget(Widget):
@@ -507,7 +507,7 @@ class Menu_widget(Widget):
 	def loadBackgroundImage(self):
 		if self.kwargs["backgroundImage"]:
 			self.backgroundImage = stretchImage(self.gui.get_image(
-                self.kwargs["backgroundImage"]), self.kwargs["size"], 5)
+				self.kwargs["backgroundImage"]), self.kwargs["size"], 5)
 
 	def initWidgets(self):
 		pass
@@ -515,14 +515,14 @@ class Menu_widget(Widget):
 	def addSubWidget(self, widgetName, widgetType, pos, *widgetArgs, **widgetKwargs):
 		if widgetName in self.subWidgets:
 			print("[WARNING] [Menu_widget.addSubWidget] A widget called " \
-                + "'%s' already exists in this Menu_widget !" % widgetName \
-                + " Destroying it")
+				+ "'%s' already exists in this Menu_widget !" % widgetName \
+				+ " Destroying it")
 			if not self.widgetName[widgetName].isDestroyed:
 				self.subWidgets[widgetName].destroy()
 		realPos = self.getRealPos()
 		self.subWidgets[widgetName] = widgetType(self.gui, \
-            (pos[0] + realPos[0], pos[1] + realPos[1]), *widgetArgs, \
-            **widgetKwargs)
+			(pos[0] + realPos[0], pos[1] + realPos[1]), *widgetArgs, \
+			**widgetKwargs)
 
 	def removeSubWidget(self, widgetName):
 		if widgetName in self.subWidgets:
@@ -531,14 +531,14 @@ class Menu_widget(Widget):
 			self.subWidgets.pop(widgetName)
 		else:
 			print("[WARNING] [Menu_widget.removeSubWidget] No widget called " \
-                + "'%s' in this Menu_widget" % widgetName)
+				+ "'%s' in this Menu_widget" % widgetName)
 
 	def configSubWidget(self, widgetName, **kwargs):
 		if widgetName in self.subWidgets:
 			self.subWidgets[widgetName].config(**kwargs)
 		else:
 			print("[WARNING] [Menu_widget.configSubWidget] No widget called " \
-                + "'%s' in this Menu_widget" % widgetName)
+				+ "'%s' in this Menu_widget" % widgetName)
 
 	def update(self, deltaTime):
 		if self.backgroundImage:
@@ -617,10 +617,10 @@ class Setting_bar(Eventable_widget):
 
 	def loadLineImages(self):
 		imageNames = ("lineImage", "onHoverLineImage", "onClickLineImage", \
-            "onMiddleClickLineImage", "onRightClickLineImage", \
-            "disableLineImage")
+			"onMiddleClickLineImage", "onRightClickLineImage", \
+			"disableLineImage")
 
-        for imageName in imageNames:
+		for imageName in imageNames:
 			if self.kwargs[imageName]:
 				image = stretchImage( \
 					self.gui.get_image(self.kwargs[imageName]), \
@@ -631,10 +631,10 @@ class Setting_bar(Eventable_widget):
 
 	def loadCursorImages(self):
 		imageNames = ("cursorImage", "onHoverCursorImage", "onClickCursorImage", \
-            "onMiddleClickCursorImage", "onRightClickCursorImage", \
-            "disableCursorImage")
+			"onMiddleClickCursorImage", "onRightClickCursorImage", \
+			"disableCursorImage")
 
-        for imageName in imageNames:
+		for imageName in imageNames:
 			if self.kwargs[imageName]:
 				image = stretchImage( \
 					self.gui.get_image(self.kwargs[imageName]), \
@@ -676,7 +676,7 @@ class Setting_bar(Eventable_widget):
 
 	def getLinePos(self):
 		x, y = self.getRealPos()
-        w, h = self.kwargs["size"]
+		w, h = self.kwargs["size"]
 		return [x, y + h // 2 - self.kwargs["lineThickness"] // 2]
 
 	def getCursorPos(self):
@@ -688,25 +688,25 @@ class Setting_bar(Eventable_widget):
 			if event.type == MOUSEMOTION:
 				realPos = self.getRealPos()
 				if event.pos[0] >= realPos[0] + self.kwargs["cursorWidth"] / 2 \
-                    and event.pos[0] <= realPos[0] + self.kwargs["size"][0] \
-                    - self.kwargs["cursorWidth"] / 2:
+					and event.pos[0] <= realPos[0] + self.kwargs["size"][0] \
+					- self.kwargs["cursorWidth"] / 2:
 					self.cursorPos = event.pos[0]
 				elif event.pos[0] < realPos[0] + self.kwargs["cursorWidth"] / 2:
 					self.cursorPos = realPos[0] + self.kwargs["cursorWidth"] / 2
 				else:
 					self.cursorPos = realPos[0] + self.kwargs["size"][0] \
-                    - self.kwargs["cursorWidth"] / 2
+					- self.kwargs["cursorWidth"] / 2
 
 	def getValue(self):
 		realPos = self.getRealPos()
 		if self.kwargs["size"][0] - self.kwargs["cursorWidth"] != 0:
 			return (self.cursorPos - realPos[0] - self.kwargs["cursorWidth"] \
-                / 2) / (self.kwargs["size"][0] - self.kwargs["cursorWidth"])
+				/ 2) / (self.kwargs["size"][0] - self.kwargs["cursorWidth"])
 		return 0.5
 
 	def getCursorPosWithValue(self, value):
 		return value * (self.kwargs["size"][0] - self.kwargs["cursorWidth"]) \
-            + self.kwargs["cursorWidth"] / 2 + self.getRealPos()[0]
+			+ self.kwargs["cursorWidth"] / 2 + self.getRealPos()[0]
 
 	def config(self, **kwargs):
 		Eventable_widget.config(self, **kwargs)
@@ -737,7 +737,7 @@ class Setting_bar(Eventable_widget):
 
 class Switch_button(Button):
 
-    fpath = join(Path.GUI, "switch button")
+	fpath = join(Path.GUI, "switch button")
 	DEFAULT_KWARGS = {
 		"backgroundImage": join(fpath, "switch_activated.png"),
 		"onHoverBackgroundImage": join(fpath, "switch_activated_hover.png"),
@@ -757,13 +757,13 @@ class Switch_button(Button):
 	def __init__(self, gui, pos, **kwargs):
 		Switch_button.updateDefaultKwargs(kwargs)
 
-        self.desactivatedBackgroundImages = {}
+		self.desactivatedBackgroundImages = {}
 		self.activated = True
 
 		Button.__init__(self, gui, pos, **kwargs)
 
 	def loadBackgroundImages(self):
-        eventNames = (
+		eventNames = (
 			"",
 			"OnHover",
 			"OnClick",
@@ -783,22 +783,22 @@ class Switch_button(Button):
 		if self.activated:
 			Button.update(self, deltaTime)
 		else:
-            eventName = ""
-    		if (not self.kwargs["enable"]):
-    			eventName = "Disable"
-    		elif self.clicked:
-    			eventName = "OnClick"
-    		elif self.rightClicked:
-    			eventName = "OnRightClick"
-    		elif self.middleClicked:
-    			eventName = "OnMiddleClick"
-    		elif self.hovered:
-    			eventName = "OnHover"
+			eventName = ""
+			if (not self.kwargs["enable"]):
+				eventName = "Disable"
+			elif self.clicked:
+				eventName = "OnClick"
+			elif self.rightClicked:
+				eventName = "OnRightClick"
+			elif self.middleClicked:
+				eventName = "OnMiddleClick"
+			elif self.hovered:
+				eventName = "OnHover"
 
-    		if eventName in self.desactivatedBackgroundImages:
-    			self.gui.draw_image(self.desactivatedBackgroundImages[eventName], \
-    				self.getRealPos())
-            Eventable_widget.update(self, deltaTime)
+			if eventName in self.desactivatedBackgroundImages:
+				self.gui.draw_image(self.desactivatedBackgroundImages[eventName], \
+					self.getRealPos())
+			Eventable_widget.update(self, deltaTime)
 
 	def onClickEnd(self):
 		if self.clicked:

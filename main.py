@@ -15,41 +15,37 @@ import pygame
 import os
 import sys
 
-from pygame.locals import K_LCTRL, K_LALT, K_DELETE
+from pygame.locals import K_LCTRL, K_ESCAPE
 
 
 def main():
-    try:
-        pygame.init()
+    pygame.init()
 
-        Instance.gui = GUI()
-        Instance.gui.create_root_surface()
-        Instance.gui.load_images()
+    Instance.gui = GUI()
+    Instance.gui.create_root_surface()
+    Instance.gui.load_images()
 
-        Instance.event_manager = Event_manager()
-        Instance.event_manager.add_keyboard_listener(exit, K_LCTRL, \
-            modifiers = [K_LALT, K_DELETE])
+    Instance.event_manager = Event_manager()
+    Instance.event_manager.add_keyboard_listener(exit, K_LCTRL, \
+        modifiers = [K_ESCAPE])
 
-        Instance.view = Desktop_view()
-        Instance.view.init_widgets()
+    Instance.view = Desktop_view()
+    Instance.view.init_widgets()
 
-        Instance.activity = Desktop_activity(Instance.view)
+    Instance.activity = Desktop_activity(Instance.view)
 
-        clock = pygame.time.Clock()
+    clock = pygame.time.Clock()
 
-        while True:
-            pygame.event.pull()
-            deltatime = clock.tick()
+    while True:
+        pygame.event.pump()
+        deltatime = clock.tick()
 
-            Instance.event_manager.update()
-            if Instance.app:
-                Instance.app.update(deltatime)
-            else:
-                Instance.activity.update(deltatime)
-            Instance.gui.update()
-
-    except Exception:
-        pass
+        Instance.event_manager.update()
+        if Instance.app:
+            Instance.app.update(deltatime)
+        else:
+            Instance.activity.update(deltatime)
+        Instance.gui.update()
 
 
 if __name__ == "__main__":

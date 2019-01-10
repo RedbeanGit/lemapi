@@ -7,7 +7,7 @@ resolution.
 Created on 16/12/2018
 """
 
-from game.util import getScreenRatio, getScreenSize, getMonitorSize
+from util import getScreenRatio, getScreenSize, getMonitorSize
 
 __author__ = "Julien Dubois"
 __version__ = "1.1.2"

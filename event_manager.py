@@ -35,14 +35,14 @@ class Event_manager(object):
                 self.listeners[fct]["keys"].remove(key)
 
     def update(self):
-        for event in pygame.event.get():
-            if event.type == QUIT:
+        for e in event.get():
+            if e.type == QUIT:
                 exit()
-            elif event.type == KEYDOWN:
-                self.keys_down.append(event.key)
-            elif event.type == KEYUP:
-                if event.key in self.keys_down:
-                    self.keys_down.remove(event.key)
+            elif e.type == KEYDOWN:
+                self.keys_down.append(e.key)
+            elif e.type == KEYUP:
+                if e.key in self.keys_down:
+                    self.keys_down.remove(e.key)
         self.update_listeners()
 
     def has_keys_down(self, keys):

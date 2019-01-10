@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from constants import Path.GAMES
+from constants import Path
 from util import read_json, has_function
 
 __author__ = "Julien Dubois"
@@ -95,4 +95,4 @@ class Application(object):
         if not exists(Path.GAMES):
             os.makedirs(Path.GAMES)
         games = os.listdir(Path.GAMES)
-        return [g if "manifest.json" in os.listdir(join(Path.GAMES, g)) for g in games]
+        return [g for g in games if "manifest.json" in os.listdir(join(Path.GAMES, g))]

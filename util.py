@@ -13,6 +13,10 @@ import json
 import os
 import pygame
 import sys
+import gi
+
+gi.require_version('Gdk', '3.0')
+
 from gi.repository import Gdk
 
 ################################################################################
