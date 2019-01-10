@@ -15,6 +15,8 @@ __version__ = "1.1.2"
 
 import os
 import pygame.freetype
+
+from os.path import join
 from pygame.locals import MOUSEMOTION, MOUSEBUTTONDOWN, MOUSEBUTTONUP
 
 
@@ -70,7 +72,7 @@ class Text(Widget):
 
     DEFAULT_KWARGS = {
         "fontSize": 20,
-        "font": os.path.join(Path.GUI, "font.ttf"),
+        "font": join(Path.GUI, "font.ttf"),
 
         "bold": False,
         "wide": False,
@@ -274,16 +276,16 @@ class Button(Eventable_widget):
 			"anchor": (0, 0)
 		},
 		"textAnchor": (0, 0),
-		"backgroundImage": os.path.join(Path.GUI, "button", "button.png"),
-		"onHoverBackgroundImage": os.path.join(Path.GUI, "button", \
+		"backgroundImage": join(Path.GUI, "button", "button.png"),
+		"onHoverBackgroundImage": join(Path.GUI, "button", \
 			"button_hover.png"),
-		"onClickBackgroundImage": os.path.join(Path.GUI, "button", \
+		"onClickBackgroundImage": join(Path.GUI, "button", \
 			"button_click.png"),
-		"onMiddleClickBackgroundImage": os.path.join(Path.GUI, "button", \
+		"onMiddleClickBackgroundImage": join(Path.GUI, "button", \
 			"button_middle_click.png"),
-		"onRightClickBackgroundImage": os.path.join(Path.GUI, "button", \
+		"onRightClickBackgroundImage": join(Path.GUI, "button", \
 			"button_right_click.png"),
-		"disableBackgroundImage": os.path.join(Path.GUI, "button", \
+		"disableBackgroundImage": join(Path.GUI, "button", \
 			"button_disable.png")
 	}
 
@@ -490,7 +492,7 @@ class Image_widget(Widget):
 class Menu_widget(Widget):
 
 	DEFAULT_KWARGS = {
-		"backgroundImage": os.path.join(Path.GUI, "frame.png")
+		"backgroundImage": join(Path.GUI, "frame.png")
 	}
 
 	def __init__(self, gui, pos, **kwargs):
@@ -575,19 +577,19 @@ class Setting_bar(Eventable_widget):
 
 		"value": 0,
 
-		"lineImage": os.path.join(Path.GUI, "setting bar", "line.png"),
-		"onHoverLineImage": os.path.join(Path.GUI, "setting bar", "line_hover.png"),
-		"onClickLineImage": os.path.join(Path.GUI, "setting bar", "line_click.png"),
-		"onMiddleClickLineImage": os.path.join(Path.GUI, "setting bar", "line_middle_click.png"),
-		"onRightClickLineImage": os.path.join(Path.GUI, "setting bar", "line_right_click.png"),
-		"disableLineImage": os.path.join(Path.GUI, "setting bar", "line_disable.png"),
+		"lineImage": join(Path.GUI, "setting bar", "line.png"),
+		"onHoverLineImage": join(Path.GUI, "setting bar", "line_hover.png"),
+		"onClickLineImage": join(Path.GUI, "setting bar", "line_click.png"),
+		"onMiddleClickLineImage": join(Path.GUI, "setting bar", "line_middle_click.png"),
+		"onRightClickLineImage": join(Path.GUI, "setting bar", "line_right_click.png"),
+		"disableLineImage": join(Path.GUI, "setting bar", "line_disable.png"),
 
-		"cursorImage": os.path.join(Path.GUI, "setting bar", "cursor.png"),
-		"onHoverCursorImage": os.path.join(Path.GUI, "setting bar", "cursor_hover.png"),
-		"onClickCursorImage": os.path.join(Path.GUI, "setting bar", "cursor_click.png"),
-		"onMiddleClickCursorImage": os.path.join(Path.GUI, "setting bar", "cursor_middle_click.png"),
-		"onRightClickCursorImage": os.path.join(Path.GUI, "setting bar", "cursor_right_click.png"),
-		"disableCursorImage": os.path.join(Path.GUI, "setting bar", "cursor_disable.png")
+		"cursorImage": join(Path.GUI, "setting bar", "cursor.png"),
+		"onHoverCursorImage": join(Path.GUI, "setting bar", "cursor_hover.png"),
+		"onClickCursorImage": join(Path.GUI, "setting bar", "cursor_click.png"),
+		"onMiddleClickCursorImage": join(Path.GUI, "setting bar", "cursor_middle_click.png"),
+		"onRightClickCursorImage": join(Path.GUI, "setting bar", "cursor_right_click.png"),
+		"disableCursorImage": join(Path.GUI, "setting bar", "cursor_disable.png")
 	}
 
 	def __init__(self, gui, pos, **kwargs):
@@ -731,3 +733,84 @@ class Setting_bar(Eventable_widget):
 
 		if "value" in kwargs:
 			self.cursorPos = self.getCursorPosWithValue(kwargs["value"])
+
+
+class Switch_button(Button):
+
+    fpath = join(Path.GUI, "switch button")
+	DEFAULT_KWARGS = {
+		"backgroundImage": join(fpath, "switch_activated.png"),
+		"onHoverBackgroundImage": join(fpath, "switch_activated_hover.png"),
+		"onClickBackgroundImage": join(fpath, "switch_activated_click.png"),
+		"onMiddleClickBackgroundImage": join(fpath, "switch_activated_middle_click.png"),
+		"onRightClickBackgroundImage": join(fpath, "switch_activated_right_click.png"),
+		"disableBackgroundImage": join(fpath, "switch_activated_disable.png"),
+
+		"desactivatedBackgroundImage": join(fpath, "switch_desactivated.png"),
+		"desactivatedOnHoverBackgroundImage": join(fpath, "switch_desactivated_hover.png"),
+		"desactivatedOnClickBackgroundImage": join(fpath, "switch_desactivated_click.png"),
+		"desactivatedOnMiddleClickBackgroundImage": join(fpath, "switch_desactivated_middle_click.png"),
+		"desactivatedOnRightClickBackgroundImage": join(fpath, "switch_desactivated_right_click.png"),
+		"desactivatedDisableBackgroundImage": join(fpath, "switch_desactivated_disable.png")
+	}
+
+	def __init__(self, gui, pos, **kwargs):
+		Switch_button.updateDefaultKwargs(kwargs)
+
+        self.desactivatedBackgroundImages = {}
+		self.activated = True
+
+		Button.__init__(self, gui, pos, **kwargs)
+
+	def loadBackgroundImages(self):
+        eventNames = (
+			"",
+			"OnHover",
+			"OnClick",
+			"OnMiddleClick",
+			"OnRightClick",
+			"Disable"
+		)
+
+		for eventName in eventNames:
+			backgroundName = eventName + "BackgroundImage"
+			self.desactivatedBackgroundImages[eventName] = resizeImage(
+				self.gui.get_image(self.kwargs[backgroundName]), \
+				self.kwargs["size"])
+		Button.loadBackgroundImages(self)
+
+	def update(self, deltaTime):
+		if self.activated:
+			Button.update(self, deltaTime)
+		else:
+            eventName = ""
+    		if (not self.kwargs["enable"]):
+    			eventName = "Disable"
+    		elif self.clicked:
+    			eventName = "OnClick"
+    		elif self.rightClicked:
+    			eventName = "OnRightClick"
+    		elif self.middleClicked:
+    			eventName = "OnMiddleClick"
+    		elif self.hovered:
+    			eventName = "OnHover"
+
+    		if eventName in self.desactivatedBackgroundImages:
+    			self.gui.draw_image(self.desactivatedBackgroundImages[eventName], \
+    				self.getRealPos())
+            Eventable_widget.update(self, deltaTime)
+
+	def onClickEnd(self):
+		if self.clicked:
+			self.activated = not self.activated
+		Button.onClickEnd(self)
+
+	def config(self, **kwargs):
+		Button.config(self, **kwargs)
+		if "desactivatedBackgroundImage" in kwargs \
+		or "desactivatedOnHoverBackgroundImage" in kwargs \
+		or "desactivatedOnClickBackgroundImage" in kwargs \
+		or "desactivatedOnMiddleClickBackgroundImage" in kwargs \
+		or "desactivatedOnRightClickBackgroundImage" in kwargs \
+		or "desactivatedDisableBackgroundImage" in kwargs:
+			self.loadBackgroundImages()

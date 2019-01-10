@@ -12,6 +12,7 @@ __version__ = "0.1.0"
 import json
 import os
 import pygame
+import sys
 from gi.repository import Gdk
 
 ################################################################################
@@ -203,3 +204,25 @@ def read_json(path):
 
 def write_json(path, content):
     write_file(path, json.dumps(content, indent="\t"))
+
+################################################################################
+### Introspection ##############################################################
+################################################################################
+
+
+def has_function(module, fct):
+	if fct in dir(module):
+		exec("c = callable(%s.%s)" % (module.__name__, fct))
+		return c
+	return False
+
+def has_variable(module, v):
+	return v in dir(module)
+
+################################################################################
+### Introspection ##############################################################
+################################################################################
+
+
+def exit(errorLevel = 0):
+	sys.exit(errorLevel)

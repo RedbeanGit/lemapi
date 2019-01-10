@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from constants import App
+from util import read_json
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
@@ -10,23 +11,22 @@ import pygame
 
 
 class GUI(object):
-
     def __init__(self):
-
         if not pygame.get_init():
             pygame.init()
 
         self.images = {}
         self.root_surface = None
         self.updated_rect = []
-        self.view = None
+
+        self.create_root_surface()
 
     def create_root_surface(self):
-        self.root_surface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        self.root_surface = pygame.display.set_mode((800, 450))#, pygame.FULLSCREEN)
         pygame.display.set_caption(App.NAME)
 
     def load_images(self):
-        pass
+        images = read_json()
 
     def load_image(self, path):
         if os.path.exists(path):
