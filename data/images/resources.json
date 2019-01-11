@@ -1,3 +1,4 @@
 [
-  ["widget", "button", "button_click.png"]
+  ["widget", "button", "button_click.png"],
+  ["background", "white_degrade.jpg"]
 ]

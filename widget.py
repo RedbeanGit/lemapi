@@ -40,7 +40,7 @@ class Widget:
 			if key not in kwargs:
 				kwargs[key] = value
 
-	def update(self, deltaTime):
+	def update(self):
 		pass
 
 	def onEvent(self, event):
@@ -96,11 +96,11 @@ class Text(Widget):
 		kwargs.pop("font")
 		self.config(**kwargs)
 
-	def update(self, deltaTime):
+	def update(self):
 		surface, rect = self.font.render(self.text, bgcolor=self.kwargs["backgroundColor"])
 		self.kwargs["size"] = (rect.width, rect.height)
 		self.gui.draw_image(surface, self.getRealPos())
-		Widget.update(self, deltaTime)
+		Widget.update(self)
 
 	def config(self, **kwargs):
 		Widget.config(self, **kwargs)
@@ -338,7 +338,7 @@ class Button(Eventable_widget):
 				self.gui.get_image(self.kwargs[backgroundName]), \
 				self.kwargs["size"])
 
-	def update(self, deltaTime):
+	def update(self):
 		"""
 		Redraw the button with the best background for the current event.
 		"""
@@ -359,8 +359,8 @@ class Button(Eventable_widget):
 			self.gui.draw_image(self.backgroundImages[eventName], \
 				self.getRealPos())
 
-		self.text.update(deltaTime)
-		Eventable_widget.update(self, deltaTime)
+		self.text.update()
+		Eventable_widget.update(self)
 
 	def config(self, **kwargs):
 		"""
@@ -407,7 +407,7 @@ class Clickable_text(Text, Eventable_widget):
 		Text.__init__(self, gui, pos, text, **kwargs)
 		Eventable_widget.__init__(self, gui, pos, **self.kwargs)
 
-	def update(self, deltaTime):
+	def update(self):
 		if not self.kwargs["enable"]:
 			self.font.fgcolor = self.kwargs["disableTextColor"]
 		elif self.clicked:
@@ -420,7 +420,7 @@ class Clickable_text(Text, Eventable_widget):
 			self.font.fgcolor = self.kwargs["onHoverTextColor"]
 		else:
 			self.font.fgcolor = self.kwargs["textColor"]
-		Text.update(self, deltaTime)
+		Text.update(self)
 
 
 class Image_widget(Widget):
@@ -460,7 +460,7 @@ class Image_widget(Widget):
 		self.image = self.gui.get_image(imagePath)
 		self.kwargs["size"] = self.image.get_size()
 
-	def update(self, deltaTime):
+	def update(self):
 		"""
 		Redraw the image on the game window.
 		This method should be called each frame.
@@ -470,6 +470,7 @@ class Image_widget(Widget):
 			seconds)
 		"""
 		self.gui.draw_image(self.image, self.getRealPos())
+		Widget.update(self)
 
 	def resize(self, newSize):
 		"""
@@ -540,12 +541,12 @@ class Menu_widget(Widget):
 			print("[WARNING] [Menu_widget.configSubWidget] No widget called " \
 				+ "'%s' in this Menu_widget" % widgetName)
 
-	def update(self, deltaTime):
+	def update(self):
 		if self.backgroundImage:
 			self.gui.draw_image(self.backgroundImage, self.getRealPos())
 		for widget in tuple(self.subWidgets.values()):
 			if not widget.isDestroyed:
-				widget.update(deltaTime)
+				widget.update()
 
 	def onEvent(self, event):
 		for widget in tuple(self.subWidgets.values()):
@@ -642,9 +643,10 @@ class Setting_bar(Eventable_widget):
 					self.kwargs["cursorImageBorderSize"])
 				self.__setattr__(imageName, image)
 
-	def update(self, deltaTime):
+	def update(self):
 		self.drawLine()
 		self.drawCursor()
+		Eventable_widget.update(self)
 
 	def drawLine(self):
 		if not self.kwargs["enable"] and self.disableLineImage:
@@ -779,9 +781,9 @@ class Switch_button(Button):
 				self.kwargs["size"])
 		Button.loadBackgroundImages(self)
 
-	def update(self, deltaTime):
+	def update(self):
 		if self.activated:
-			Button.update(self, deltaTime)
+			Button.update(self)
 		else:
 			eventName = ""
 			if (not self.kwargs["enable"]):
@@ -798,7 +800,7 @@ class Switch_button(Button):
 			if eventName in self.desactivatedBackgroundImages:
 				self.gui.draw_image(self.desactivatedBackgroundImages[eventName], \
 					self.getRealPos())
-			Eventable_widget.update(self, deltaTime)
+			Eventable_widget.update(self)
 
 	def onClickEnd(self):
 		if self.clicked:

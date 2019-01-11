@@ -3,6 +3,7 @@
 from application import Application
 from constants import Instance, Path
 from launcher_widget import App_widget, Notif_widget
+from util import getusername
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
@@ -24,13 +25,15 @@ class Activity(object):
 
 class Desktop_activity(Activity):
     def __init__(self, desktop_view):
-        self.apps = []
         super().__init__(desktop_view)
+        self.apps = []
+        self.load_apps()
 
     def load_apps(self):
         apps = Application.get_all_apps()
+        path = Path.GAMES.format(user=getusername())
         for app_name in apps:
-            app = Application(join(Path.GAMES, app_name))
+            app = Application(join(path, app_name))
             app.load_infos()
             self.apps.append(app)
 

@@ -2,7 +2,8 @@
 
 from constants import Instance, Path
 from layout import Layout
-from util import read_json
+from util import read_json, getScreenSize
+from widget import Image_widget
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
@@ -54,4 +55,7 @@ class Desktop_view(View):
         self.layout = self.load_layout(os.path.join(Path.VIEWS, "desktop.json"))
 
     def init_widgets(self):
-        pass
+        w, h = getScreenSize()
+        bg_path = os.path.join(Path.IMAGES, "background", "white_degrade.jpg")
+        self.add_widget("background_image", Image_widget, (w // 2, h // 2), \
+            bg_path, size=(w, h), anchor=(0, 0))

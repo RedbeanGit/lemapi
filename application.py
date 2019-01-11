@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from constants import Path
-from util import read_json, has_function
+from util import read_json, has_function, getusername
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
@@ -18,10 +18,11 @@ class Application(object):
         self.path = path
         self.id = random.random()
         self.infos = self.load_infos()
-
+        print("[INFO] [Application.__init__] New app created " \
+            + "(path=%s, id=%s, infos=%s)" % (self.path, self.id, self.infos))
         self.reset()
 
-    def reset():
+    def reset(self):
         self.app_module = None
         self.initable = False
         self.updatable = False
@@ -92,7 +93,8 @@ class Application(object):
 
     @staticmethod
     def get_all_apps():
-        if not exists(Path.GAMES):
-            os.makedirs(Path.GAMES)
-        games = os.listdir(Path.GAMES)
-        return [g for g in games if "manifest.json" in os.listdir(join(Path.GAMES, g))]
+        path = Path.GAMES.format(user=getusername())
+        if not exists(path):
+            os.makedirs(path)
+        games = os.listdir(path)
+        return [g for g in games if "manifest.json" in os.listdir(join(path, g))]

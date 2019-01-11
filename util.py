@@ -14,6 +14,7 @@ import os
 import pygame
 import sys
 import gi
+import getpass
 
 gi.require_version('Gdk', '3.0')
 
@@ -224,9 +225,12 @@ def has_variable(module, v):
 	return v in dir(module)
 
 ################################################################################
-### Introspection ##############################################################
+### Program useful #############################################################
 ################################################################################
 
 
 def exit(errorLevel = 0):
 	sys.exit(errorLevel)
+
+def getusername():
+	return getpass.getuser()

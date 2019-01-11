@@ -15,7 +15,7 @@ class Path(object):
     IMAGES = join(DATA, "images")
     GUI = join(IMAGES, "gui")
     VIEWS = join(DATA, "views")
-    GAMES = join("/", "home", "pi", "games")
+    GAMES = join("/", "home", "{user}", "games")
 
 
 class Instance(object):

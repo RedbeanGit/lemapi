@@ -24,17 +24,22 @@ class GUI(object):
         images = read_json(os.path.join(Path.IMAGES, "resources.json"))
         if images:
             for image in images:
-                self.load_image(os.path.join(*image))
+                self.load_image(os.path.join(Path.IMAGES, *image))
 
     def load_image(self, path):
         if os.path.exists(path):
-            self.images = pygame.image.load(path)
+            try:
+                self.images[path] = pygame.image.load(path)
+                print("[INFO] [GUI.load_image] Image '%s' loaded" % path)
+            except Exception:
+                pass
 
     def get_image(self, path, alpha = True):
         if path in self.images:
             if alpha:
                 return self.images[path].convert_alpha()
             return self.images[path].convert()
+        print("[WARNING] [GUI.get_image] Image '%s' not loaded!" % path)
         return pygame.surface.Surface((16, 16))
 
     def update(self):

@@ -14,38 +14,45 @@ __version__ = "0.1.0"
 import pygame
 import os
 import sys
+import traceback
 
 from pygame.locals import K_LCTRL, K_ESCAPE
 
 
 def main():
-    pygame.init()
+    try:
+        print("[INFO] [main] Lem Launcher started")
+        pygame.init()
 
-    Instance.gui = GUI()
-    Instance.gui.create_root_surface()
-    Instance.gui.load_images()
+        Instance.gui = GUI()
+        Instance.gui.create_root_surface()
+        Instance.gui.load_images()
 
-    Instance.event_manager = Event_manager()
-    Instance.event_manager.add_keyboard_listener(exit, K_LCTRL, \
-        modifiers = [K_ESCAPE])
+        Instance.event_manager = Event_manager()
+        Instance.event_manager.add_keyboard_listener(exit, K_LCTRL, \
+            modifiers = [K_ESCAPE])
 
-    Instance.view = Desktop_view()
-    Instance.view.init_widgets()
+        Instance.view = Desktop_view()
+        Instance.view.init_widgets()
 
-    Instance.activity = Desktop_activity(Instance.view)
+        Instance.activity = Desktop_activity(Instance.view)
 
-    clock = pygame.time.Clock()
+        clock = pygame.time.Clock()
 
-    while True:
-        pygame.event.pump()
-        deltatime = clock.tick()
+        while True:
+            pygame.event.pump()
+            deltatime = clock.tick()
 
-        Instance.event_manager.update()
-        if Instance.app:
-            Instance.app.update(deltatime)
-        else:
-            Instance.activity.update(deltatime)
-        Instance.gui.update()
+            Instance.event_manager.update()
+            if Instance.app:
+                Instance.app.update(deltatime)
+            else:
+                Instance.activity.update(deltatime)
+            Instance.gui.update()
+    except Exception:
+        print("[FATAL ERROR] [main] Something wrong happened!")
+        pygame.quit()
+        traceback.print_exc()
 
 
 if __name__ == "__main__":
