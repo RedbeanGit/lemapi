@@ -28,18 +28,19 @@ class Desktop_activity(Activity):
         super().__init__(desktop_view)
         self.apps = []
         self.load_apps()
+        self.load_icons()
 
     def load_apps(self):
-        apps = Application.get_all_apps()
+        apps = Application.get_local_apps()
         path = Path.GAMES.format(user=getusername())
-        for app_name in apps:
-            app = Application(join(path, app_name))
+        for app_path in apps:
+            app = Application(app_path)
             app.load_infos()
             self.apps.append(app)
 
     def load_icons(self):
         for app in self.apps:
-            self.view.add_widget("%s_app_icon" % app.id, App_icon, (0, 0), app)
+            self.view.add_widget("%s_app_icon" % app.id, App_widget, (0, 0), app)
 
     def add_notif(self, title, msg):
         self.view.add_widget("notif", Notif_widget, (0, 0), title, msg)

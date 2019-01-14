@@ -13,6 +13,7 @@ from util import resizeImage, stretchImage
 __author__ = "Julien Dubois"
 __version__ = "1.1.2"
 
+import collections
 import os
 import pygame.freetype
 
@@ -30,7 +31,7 @@ class Widget:
 	def __init__(self, gui, pos, **kwargs):
 		Widget.updateDefaultKwargs(kwargs)
 		self.gui = gui
-		self.pos = pos
+		self.pos = tuple(pos)
 		self.isDestroyed = False
 		self.kwargs = dict(kwargs)
 
@@ -67,6 +68,9 @@ class Widget:
 	def destroy(self):
 		self.isDestroyed = True
 
+	def setPos(self, pos):
+		self.pos = tuple(pos)
+
 
 class Text(Widget):
 
@@ -91,7 +95,11 @@ class Text(Widget):
 		self.createFont()
 
 	def createFont(self):
-		self.font = pygame.freetype.Font(self.kwargs["font"])
+		if os.path.exists(self.kwargs["font"]):
+			self.font = pygame.freetype.Font(self.kwargs["font"])
+		else:
+			fontname = pygame.freetype.get_default_font()
+			self.font = pygame.freetype.SysFont(fontname, self.kwargs["fontSize"])
 		kwargs = dict(self.kwargs)
 		kwargs.pop("font")
 		self.config(**kwargs)
@@ -500,7 +508,7 @@ class Menu_widget(Widget):
 		Menu_widget.updateDefaultKwargs(kwargs)
 		Widget.__init__(self, gui, pos, **kwargs)
 
-		self.subWidgets = {}
+		self.subWidgets = collections.OrderedDict()
 		self.backgroundImage = None
 		self.loadBackgroundImage()
 		self.initWidgets()
@@ -565,6 +573,13 @@ class Menu_widget(Widget):
 		if "enable" in kwargs:
 			for widget in self.subWidgets.values():
 				widget.config(enable = kwargs["enable"])
+
+	def setPos(self, pos):
+		vx, vy = pos[0] - self.pos[0], pos[1] - self.pos[1]
+		for widget in self.subWidgets.values():
+			x, y = widget.pos
+			widget.setPos((x + vx, y + vy))
+		Widget.setPos(self, pos)
 
 
 class Setting_bar(Eventable_widget):

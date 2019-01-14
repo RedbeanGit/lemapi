@@ -14,10 +14,13 @@ __version__ = "0.1.0"
 import pygame
 import os
 import sys
+import threading
 import traceback
 
 from pygame.locals import K_LCTRL, K_ESCAPE
 
+debug_active = False
+thread = None
 
 def main():
     try:
@@ -39,6 +42,8 @@ def main():
 
         clock = pygame.time.Clock()
 
+        start_inter_debug()
+
         while True:
             pygame.event.pump()
             deltatime = clock.tick()
@@ -52,7 +57,32 @@ def main():
     except Exception:
         print("[FATAL ERROR] [main] Something wrong happened!")
         pygame.quit()
+        stop_inter_debug()
         traceback.print_exc()
+
+
+def start_inter_debug():
+    global thread
+    global debug_active
+    def exec_cmd():
+        global debug_active
+        while debug_active:
+            cmd = input("> ")
+            try:
+                exec(cmd)
+            except Exception as e:
+                print(e)
+                sys.exit()
+
+    thread = threading.Thread(target = exec_cmd)
+    debug_active = True
+    thread.start()
+
+def stop_inter_debug():
+    global debug_active
+    debug_active = False
+    if thread:
+        thread.join()
 
 
 if __name__ == "__main__":

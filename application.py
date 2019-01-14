@@ -8,15 +8,17 @@ __version__ = "0.1.0"
 
 from os.path import exists, join, splitext
 import os
-import random
 import sys
 
 
 class Application(object):
 
+    nb_apps = 0
+
     def __init__(self, path):
+        Application.nb_apps += 1
         self.path = path
-        self.id = random.random()
+        self.id = Application.nb_apps
         self.infos = self.load_infos()
         print("[INFO] [Application.__init__] New app created " \
             + "(path=%s, id=%s, infos=%s)" % (self.path, self.id, self.infos))
@@ -29,6 +31,7 @@ class Application(object):
         self.killable = False
 
     def load_infos(self):
+        print(self.path)
         infos = read_json(join(self.path, "manifest.json"))
         if infos:
             return infos
@@ -92,9 +95,10 @@ class Application(object):
         self.reset()
 
     @staticmethod
-    def get_all_apps():
+    def get_local_apps():
         path = Path.GAMES.format(user=getusername())
         if not exists(path):
             os.makedirs(path)
         games = os.listdir(path)
-        return [g for g in games if "manifest.json" in os.listdir(join(path, g))]
+        return [join(path, g) for g in games if "manifest.json" in \
+            os.listdir(join(path, g))]
