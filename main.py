@@ -49,10 +49,13 @@ def main():
             deltatime = clock.tick()
 
             Instance.event_manager.update()
-            if Instance.app:
-                Instance.app.update(deltatime)
-            else:
-                Instance.activity.update(deltatime)
+            if not Instance.view:
+                Instance.view = Desktop_view()
+            if not Instance.activity:
+                Instance.activity = Desktop_activity(Instance.view)
+
+            Instance.activity.update(deltatime)
+            Instance.view.update()
             Instance.gui.update()
     except Exception:
         print("[FATAL ERROR] [main] Something wrong happened!")
@@ -72,7 +75,6 @@ def start_inter_debug():
                 exec(cmd)
             except Exception as e:
                 print(e)
-                sys.exit()
 
     thread = threading.Thread(target = exec_cmd)
     debug_active = True

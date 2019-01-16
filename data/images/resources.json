@@ -1,4 +1,6 @@
 [
-  ["widget", "button", "button_click.png"],
-  ["background", "white_degrade.jpg"]
+  ["background", "white_degrade.jpg"],
+  ["gui", "button", "button_click.png"],
+  ["gui", "app_border.png"],
+  ["gui", "app_frame.png"]
 ]

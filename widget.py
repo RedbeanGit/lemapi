@@ -434,7 +434,8 @@ class Clickable_text(Text, Eventable_widget):
 class Image_widget(Widget):
 
 	DEFAULT_KWARGS = {
-		"size": (0, 0)
+		"size": (0, 0),
+		"borderSize": 0
 	}
 
 	def __init__(self, gui, pos, imagePath, **kwargs):
@@ -489,7 +490,11 @@ class Image_widget(Widget):
 			tuple, where width and height are integers.
 		"""
 
-		self.image = resizeImage(self.image, newSize)
+		if self.kwargs["borderSize"]:
+			self.image = stretchImage(self.image, newSize, \
+			self.kwargs["borderSize"])
+		else:
+			self.image = resizeImage(self.image, newSize)
 		self.kwargs["size"] = tuple(newSize)
 
 	def config(self, **kwargs):
@@ -501,7 +506,8 @@ class Image_widget(Widget):
 class Menu_widget(Widget):
 
 	DEFAULT_KWARGS = {
-		"backgroundImage": join(Path.GUI, "frame.png")
+		"backgroundImage": join(Path.GUI, "frame.png"),
+		"backgroundBorderSize": 0
 	}
 
 	def __init__(self, gui, pos, **kwargs):
@@ -515,8 +521,14 @@ class Menu_widget(Widget):
 
 	def loadBackgroundImage(self):
 		if self.kwargs["backgroundImage"]:
-			self.backgroundImage = stretchImage(self.gui.get_image(
-				self.kwargs["backgroundImage"]), self.kwargs["size"], 5)
+			bgs = self.kwargs["backgroundBorderSize"]
+			if bgs:
+				print("ok")
+				self.backgroundImage = stretchImage(self.gui.get_image(
+					self.kwargs["backgroundImage"]), self.kwargs["size"], bgs)
+			else:
+				self.backgroundImage = resizeImage(self.gui.get_image(
+					self.kwargs["backgroundImage"]), self.kwargs["size"])
 
 	def initWidgets(self):
 		pass

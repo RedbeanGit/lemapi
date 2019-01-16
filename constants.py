@@ -22,6 +22,8 @@ class Instance(object):
     gui = None
     audio_player = None
     view = None
+    backup_view = None
     app = None
     activity = None
+    backup_activity = None
     event_manager = None

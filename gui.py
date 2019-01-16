@@ -17,7 +17,7 @@ class GUI(object):
         self.updated_rect = []
 
     def create_root_surface(self):
-        self.root_surface = pygame.display.set_mode((800, 450))#, pygame.FULLSCREEN)
+        self.root_surface = pygame.display.set_mode((800, 480))#, pygame.FULLSCREEN)
         pygame.display.set_caption(App.NAME)
 
     def load_images(self):
