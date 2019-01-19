@@ -3,7 +3,7 @@
 
 from activity import Desktop_activity
 from constants import Instance
-from event_manager import Event_manager
+from event_manager import Listener_manager, Event
 from gui import GUI
 from util import exit
 from view import Desktop_view
@@ -31,14 +31,12 @@ def main():
         Instance.gui.create_root_surface()
         Instance.gui.load_images()
 
-        Instance.event_manager = Event_manager()
-        Instance.event_manager.add_keyboard_listener(exit, K_LCTRL, \
-            modifiers = [K_ESCAPE])
+        Instance.listener_manager = Listener_manager()
 
-        Instance.view = Desktop_view()
-        Instance.view.init_widgets()
+        view = Desktop_view()
+        view.init_widgets()
 
-        Instance.activity = Desktop_activity(Instance.view)
+        Instance.activity = Desktop_activity(view)
 
         clock = pygame.time.Clock()
 
@@ -48,14 +46,11 @@ def main():
             pygame.event.pump()
             deltatime = clock.tick()
 
-            Instance.event_manager.update()
-            if not Instance.view:
-                Instance.view = Desktop_view()
+            Instance.listener_manager.update()
             if not Instance.activity:
-                Instance.activity = Desktop_activity(Instance.view)
+                Instance.activity = Desktop_activity(view)
 
             Instance.activity.update(deltatime)
-            Instance.view.update()
             Instance.gui.update()
     except Exception:
         print("[FATAL ERROR] [main] Something wrong happened!")

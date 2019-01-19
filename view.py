@@ -1,6 +1,7 @@
 # -*- coding: utf -*-
 
-from constants import Instance, Path
+from api import get_gui
+from constants import Path
 from layout import Layout
 from util import read_json, getScreenSize
 from widget import Image_widget
@@ -28,10 +29,10 @@ class View(object):
         pass
 
     def add_widget(self, wname, wtype, pos, *wargs, **wkargs):
-        if Instance.gui:
-            if wname in self.widgets:
-                self.widgets[wname].destroy()
-            self.widgets[wname] = wtype(Instance.gui, pos, *wargs, **wkargs)
+        if wname in self.widgets:
+            self.widgets[wname].destroy()
+        gui = get_gui()
+        self.widgets[wname] = wtype(gui, pos, *wargs, **wkargs)
 
     def remove_widget(self, wname):
         if wname in self.widgets:
@@ -45,8 +46,7 @@ class View(object):
     def destroy(self):
         for widget in tuple(self.widgets.values()):
             widget.destroy()
-        if Instance.view == self:
-            Instance.view = None
+        self.widgets.clear()
 
 
 class Desktop_view(View):

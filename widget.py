@@ -134,37 +134,22 @@ class Text(Widget):
 class Eventable_widget(Widget):
 
 	DEFAULT_KWARGS = {
-		"enable": True,
-
-		"onClickFct": None,
-		"onClickArgs": (),
-		"onClickKwargs": {},
-
-		"onHoverFct": None,
-		"onHoverArgs": (),
-		"onHoverKwargs": {},
-
-		"onMiddleClickFct": None,
-		"onMiddleClickArgs": (),
-		"onMiddleClickKwargs": {},
-
-		"onRightClickFct": None,
-		"onRightClickArgs": (),
-		"onRightClickKwargs": {},
-
-		"onWheelFct": None,
-		"onWheelArgs": (),
-		"onWheelKwargs": {}
+		"enable": True
 	}
 
 	def __init__(self, gui, pos, **kwargs):
 		Eventable_widget.updateDefaultKwargs(kwargs)
 		Widget.__init__(self, gui, pos, **kwargs)
 
+		self.hoverEvents = []
 		self.hovered = False
+		self.clickEvents = []
 		self.clicked = False
+		self.middleClickEvents = []
 		self.middleClicked = False
+		self.rightClickEvents = []
 		self.rightClicked = False
+		self.wheelEvents = []
 
 	def onEvent(self, event):
 		if self.kwargs["enable"]:
@@ -205,8 +190,8 @@ class Eventable_widget(Widget):
 
 	def onHover(self):
 		self.hovered = True
-		if self.kwargs["onHoverFct"]:
-			self.kwargs["onHoverFct"](*self.kwargs["onHoverArgs"], **self.kwargs["onHoverKwargs"])
+		for event in self.hoverEvents:
+			event.call()
 
 	def onEndHover(self):
 		self.hovered = False
@@ -221,8 +206,8 @@ class Eventable_widget(Widget):
 		self.rightClicked = True
 
 	def onMouseWheel(self, direction):
-		if self.kwargs["onWheelFct"]:
-			self.kwargs["onWheelFct"](direction, *self.kwargs["onWheelArgs"], **self.kwargs["onWheelKwargs"])
+		for event in self.wheelEvents:
+			event.call(direction)
 
 	def onClickOut(self):
 		pass
@@ -239,20 +224,20 @@ class Eventable_widget(Widget):
 	def onEndClick(self):
 		if self.clicked:
 			self.clicked = False
-			if self.kwargs["onClickFct"]:
-				self.kwargs["onClickFct"](*self.kwargs["onClickArgs"], **self.kwargs["onClickKwargs"])
+			for event in self.clickEvents:
+				event.call()
 
 	def onEndMiddleClick(self):
 		if self.middleClicked:
 			self.middleClicked = False
-			if self.kwargs["onMiddleClickFct"]:
-				self.kwargs["onMiddleClickFct"](*self.kwargs["onMiddleClickArgs"], **self.kwargs["onMiddleClickKwargs"])
+			for event in self.middleClickEvents:
+				event.call()
 
 	def onEndRightClick(self):
 		if self.rightClicked:
 			self.rightClicked = False
-			if self.kwargs["onRightClickFct"]:
-				self.kwargs["onRightClickFct"](*self.kwargs["onRightClickArgs"], **self.kwargs["onRightClickKwargs"])
+			for event in self.rightClickEvents:
+				event.call()
 
 	def onEndMouseWheel(self, direction):
 		pass
@@ -523,7 +508,6 @@ class Menu_widget(Widget):
 		if self.kwargs["backgroundImage"]:
 			bgs = self.kwargs["backgroundBorderSize"]
 			if bgs:
-				print("ok")
 				self.backgroundImage = stretchImage(self.gui.get_image(
 					self.kwargs["backgroundImage"]), self.kwargs["size"], bgs)
 			else:
@@ -581,6 +565,17 @@ class Menu_widget(Widget):
 		Widget.destroy(self)
 
 	def config(self, **kwargs):
+		if "anchor" in kwargs:
+			x, y = self.pos
+			w, h = self.kwargs["size"]
+			ax, ay = "anchor"
+			nrp = (int(x - w * (ax + 1) / 2), int(y - h * (ay + 1) / 2))
+			orp = self.getRealPos()
+			vx, vy = nrp[0] - orp[0], nrp[1] - orp[1]
+			for widget in self.subWidgets.values():
+				wx, wy = widget.pos
+				widget.setPos((wx + vx, wy + vy))
+
 		Widget.config(self, **kwargs)
 		if "enable" in kwargs:
 			for widget in self.subWidgets.values():
