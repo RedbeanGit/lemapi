@@ -3,9 +3,10 @@
 
 from activity import Desktop_activity
 from api import stop_all_activities
-from system_instance import Instance
+from audio import Player
 from event_manager import Listener_manager
 from gui import GUI
+from system_instance import Instance
 from util import exit
 from view import Desktop_view
 
@@ -30,10 +31,11 @@ def main():
         Instance.gui.load_images()
 
         Instance.listener_manager = Listener_manager()
+        Instance.audio_player = Player()
+        Instance.audio_player.play()
 
         view = Desktop_view()
         view.init_widgets()
-
         Instance.activities.append(Desktop_activity(view))
 
         clock = pygame.time.Clock()

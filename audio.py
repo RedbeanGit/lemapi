@@ -21,34 +21,29 @@ from os.path import exists, join
 class Player(object):
 	def __init__(self):
 		self.nb_channels = 2
-		self.frequency = 44100
+		self.framerate = 44100
 		self.sample_width = 1
 		self.chunk_size = 1024
 
 		self.pa = pyaudio.PyAudio()
 		self.thread = None
+		self.lock = threading.RLock()
 		self.active = False
 
 		self.mixers = []
 		self.sounds = {}
 
 	def load_sound(self, path):
-		if exists(path):
-			snd = Sound(self)
-			snd.load(path)
-			self.sounds[path] = snd
+		snd = Sound(self)
+		self.sounds[path] = snd
+		if snd.load(path):
 			print("[INFO] [Player.load_sound] Sound '%s' loaded" % path)
-		else:
-			print("[WARNING] [Player.load_sound] Unable to find '%s'" path)
 
 	def load_music(self, path):
-		if exists(path):
-			msc = Music(self)
-			msc.load(path)
-			self.sounds[path] = msc
+		msc = Music(self)
+		self.sounds[path] = msc
+		if msc.load(path):
 			print("[INFO] [Player.load_music] Sound '%s' loaded" % path)
-		else:
-			print("[WARNING] [Player.load_music] Unable to find '%s'" path)
 
 	def get_sound(self, path):
 		snd = Sound(self)
@@ -65,16 +60,17 @@ class Player(object):
 		return self.chunk_size * self.sample_width * self.nb_channels
 
 	def add_mixer(self, mixer):
-		self.mixer.append(mixer)
+		self.mixers.append(mixer)
 
 	def remove_mixer(self, mixer):
 		if mixer in self.mixers:
 			self.mixers.remove(mixer)
 
 	def play(self):
-		def loop(self):
+		def loop():
 			while self.active:
-				self.update()
+				with self.lock:
+					self.update()
 
 		self.active = True
 		self.thread = threading.Thread(target=loop)
@@ -84,6 +80,8 @@ class Player(object):
 		if self.active and self.thread:
 			self.active = False
 			self.thread.join()
+			for mixer in self.mixers:
+				mixer.clear()
 
 	def update(self):
 		for mixer in self.mixers:
@@ -95,16 +93,20 @@ class Mixer(object):
 		self.player = player
 		self.stream = self.player.pa.open(
 				format = self.player.pa.get_format_from_width(
-					self.player.samples_width),
+					self.player.sample_width),
 				rate = self.player.framerate,
 				channels = self.player.nb_channels,
 				output = True
 			)
 		self.sounds = []
+		self.playing = True
 
 		self.sound_volume = 1
 		self.music_volume = 1
 		self.speed = 1
+
+	def __contains__(self, obj):
+		return obj in self.sounds
 
 	def add_sound(self, sound):
 		self.sounds.append(sound)
@@ -118,25 +120,47 @@ class Mixer(object):
 		if sound in self.sounds:
 			self.sounds.remove(sound)
 
+	def clear(self):
+		self.sounds.clear()
+		self.stream.close()
+
+	def play(self):
+		self.playing = True
+
+	def pause(self):
+		self.playing = False
+
 	def update(self):
 		chunk_size = self.player.get_chunk_size()
 		mixed_chunk = bytes(chunk_size)
-		for sound in self.sounds:
-			if sound.loaded and sound.playing:
+		if self.playing:
+			for sound in self.sounds:
+				if sound.loaded and sound.playing:
 
-				if sound.is_ended() and sound.play_count != 0:
-					sound.reset()
-					sound.play_count -= 1
+					if sound.is_ended():
+						sound.reset()
+						sound.play_count -= 1
 
-				chunk = sound.get_chunk()
+					if sound.play_count == 0:
+						sound.stop()
+					else:
+						chunk = sound.get_chunk()
 
-				try:
-					mixed_chunk = audioop.add(mixed_chunk, chunk, self.sample_width)
-				except Exception:
-					print("[WARNING] [Mixer.update] Something wrong happened " \
-						+ "when adding 2 audio chunks")
-					traceback.print_exc()
-					sound.unload()
+						try:
+							mixed_chunk = audioop.add(mixed_chunk, chunk, \
+								self.player.sample_width)
+						except Exception:
+							print("[WARNING] [Mixer.update] Something wrong " \
+								"happened when adding 2 audio chunks")
+							traceback.print_exc()
+							sound.unload()
+
+						mixed_chunk = audioop.ratecv(mixed_chunk, \
+							self.player.sample_width, \
+							self.player.nb_channels, \
+							self.player.framerate, \
+							(self.player.framerate // self.speed),
+							None)[0]
 
 		self.stream.write(mixed_chunk)
 
@@ -186,6 +210,10 @@ class Sound(object):
 	def set_play_count(self, count):
 		self.play_count = count
 
+	def set_pos(self, pos):
+		if self.loaded:
+			self.pos = pos
+
 	def reset(self):
 		self.pos = 0
 
@@ -200,6 +228,8 @@ class Sound(object):
 						self.path = path
 						self.loaded = True
 						return True
+					print("[WARNING] [Sound.load] Unmanaged header for '%s'" \
+						% path)
 			except Exception:
 				print('[WARNING] [Sound.load] Unable to load "%s"' % self.path)
 		else:
@@ -264,6 +294,8 @@ class Music(Sound):
 					self.loaded = True
 					return True
 				wf.close()
+				print("[WARNING] [Music.load] Unmanaged header for '%s'" \
+					% path)
 			except Exception:
 				print('[WARNING] [Music.load] Unable to load "%s"' % self.path)
 		else:
@@ -274,6 +306,11 @@ class Music(Sound):
 		if self.loaded:
 			self.wave_file.close()
 		super().unload()
+
+	def set_pos(self, pos):
+		if self.loaded:
+			self.wave_file.setpos(pos)
+		super().set_pos(pos)
 
 	def reset(self):
 		if self.loaded:

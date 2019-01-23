@@ -65,6 +65,15 @@ def get_view():
     return Instance.activities[-1].view
 
 
+def get_audio_player():
+    from audio import Player
+
+    if not Instance.audio_player:
+        Instance.audio_player = Player()
+        Instance.audio_player.play()
+    return Instance.audio_player
+
+
 def restart_app():
     if Instance.app:
         Instance.app.reload()
@@ -78,6 +87,11 @@ def stop_app():
         Instance.app = None
     else:
         print("[WARNING] [stop_app] No app currently running")
+
+
+def stop_audio_player():
+    if Instance.audio_player:
+        Instance.audio_player.stop()
 
 
 def get_app_id():

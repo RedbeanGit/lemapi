@@ -16,3 +16,4 @@ class Instance(object):
     audio_player = None
     activities = []
     listener_manager = None
+    audio_player = None

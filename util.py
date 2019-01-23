@@ -6,7 +6,7 @@ Provide useful functions.
 Created on 02/01/2018
 """
 
-from api import stop_app, stop_all_activities
+from api import stop_app, stop_all_activities, stop_audio_player
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
@@ -245,6 +245,7 @@ def add_modules(path):
 
 def exit(errorLevel = 0):
 	stop_app()
+	stop_audio_player()
 	sys.exit(errorLevel)
 
 def getusername():
