@@ -16,12 +16,3 @@ class Path(object):
     GUI = join(IMAGES, "gui")
     VIEWS = join(DATA, "views")
     GAMES = join("/", "home", "{user}", "games")
-
-
-class Instance(object):
-    gui = None
-    audio_player = None
-    app = None
-    activity = None
-    backup_activity = None
-    listener_manager = None

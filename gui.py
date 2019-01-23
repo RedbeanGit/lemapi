@@ -33,6 +33,8 @@ class GUI(object):
                 print("[INFO] [GUI.load_image] Image '%s' loaded" % path)
             except Exception:
                 pass
+        else:
+            print("[WARNING] [GUI.load_image] Image '%s' not found" % path)
 
     def get_image(self, path, alpha = True):
         if path in self.images:
@@ -50,6 +52,30 @@ class GUI(object):
         if self.root_surface:
             self.root_surface.blit(image, pos)
             self.updated_rect.append((pos, image.get_size()))
+
+    def draw_color(self, color, pos, size):
+        if self.root_surface:
+            rect = (pos, size)
+            self.root_surface.fill(color, rect)
+            self.updated_rect.append(rect)
+
+    def draw_polygon(self, color, pos):
+        if self.root_surface:
+            x = min(pos, key=lambda p: p[0])[0]
+            y = min(pos, key=lambda p: p[1])[1]
+            w = max(pos, key=lambda p: p[0])[0] - x
+            h = max(pos, key=lambda p: p[1])[1] - y
+            pygame.draw.polygon(self.root_surface, color, pos)
+            self.updated_rect.append(((x, y), (w, h)))
+
+    def draw_line(self, color, pos1, pos2, width=1):
+        if self.root_surface:
+            x = min(pos1[0], pos2[0])
+            y = min(pos1[1], pos2[1])
+            w = max(pos1[0], pos2[0]) - x
+            h = max(pos1[1], pos2[1]) - y
+            pygame.draw.line(self.root_surface, color, pos1, pos2, width)
+            self.updated_rect.append(((x, y), (w, h)))
 
     def get_size(self):
         if self.root_surface:

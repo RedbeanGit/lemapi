@@ -5,6 +5,7 @@ from util import exit
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
 
+from api import get_view
 from pygame import event
 from pygame.locals import QUIT, KEYDOWN, KEYUP
 
@@ -39,6 +40,7 @@ class Listener_manager(object):
                 if e.key in self.keys_down:
                     self.keys_down.remove(e.key)
                 self.keys_up.append(e.key)
+            get_view().updateEvent(e)
         self.update_listeners()
 
     @staticmethod
@@ -70,7 +72,10 @@ class Event(object):
         self.args = args
         self.kwargs = kwargs
         self.obsolete = False
+        self.enable = True
 
     def call(self, *nargs, **nkwargs):
         self.obsolete = True
-        self.fct(*nargs, *self.args, **nkwargs, **self.kwargs)
+
+        if self.enable:
+            self.fct(*nargs, *self.args, **nkwargs, **self.kwargs)

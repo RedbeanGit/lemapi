@@ -8,7 +8,7 @@ Created on 28/03/2018
 """
 
 from constants import Path
-from util import resizeImage, stretchImage
+from util import resize_image, stretch_image
 
 __author__ = "Julien Dubois"
 __version__ = "1.1.2"
@@ -63,7 +63,7 @@ class Widget:
 		x, y = self.getRealPos()
 		w, h = self.kwargs["size"]
 
-		return px >= x and px <= x + w and py >= y and py <= y + y
+		return px >= x and px <= x + w and py >= y and py <= y + h
 
 	def destroy(self):
 		self.isDestroyed = True
@@ -105,7 +105,8 @@ class Text(Widget):
 		self.config(**kwargs)
 
 	def update(self):
-		surface, rect = self.font.render(self.text, bgcolor=self.kwargs["backgroundColor"])
+		surface, rect = self.font.render(str(self.text), \
+			bgcolor=self.kwargs["backgroundColor"])
 		self.kwargs["size"] = (rect.width, rect.height)
 		self.gui.draw_image(surface, self.getRealPos())
 		Widget.update(self)
@@ -154,39 +155,38 @@ class Eventable_widget(Widget):
 	def onEvent(self, event):
 		if self.kwargs["enable"]:
 			if event.type == MOUSEMOTION:
-				if not self.isInUneventableZone(event.pos):
-					if self.isInWidget(event.pos):  self.onHover()
-					else:	self.onEndHover()
+				if self.isInWidget(event.pos):
+					self.onHover()
+				else:
+					self.onEndHover()
 
 			elif event.type == MOUSEBUTTONDOWN:
-				if not self.isInUneventableZone(event.pos):
-					if self.isInWidget(event.pos):
-						if event.button == 1:   self.onClick()
-						elif event.button == 2: self.onMiddleClick()
-						elif event.button == 3: self.onRightClick()
-						elif event.button == 4: self.onMouseWheel(1)
-						elif event.button == 5: self.onMouseWheel(-1)
-					else:
-						if event.button == 1:   self.onClickOut()
-						elif event.button == 2: self.onMiddleClickOut()
-						elif event.button == 3: self.onRightClickOut()
-						elif event.button == 4: self.onMouseWheelOut(1)
-						elif event.button == 5: self.onMouseWheelOut(-1)
+				if self.isInWidget(event.pos):
+					if event.button == 1:   self.onClick()
+					elif event.button == 2: self.onMiddleClick()
+					elif event.button == 3: self.onRightClick()
+					elif event.button == 4: self.onMouseWheel(1)
+					elif event.button == 5: self.onMouseWheel(-1)
+				else:
+					if event.button == 1:   self.onClickOut()
+					elif event.button == 2: self.onMiddleClickOut()
+					elif event.button == 3: self.onRightClickOut()
+					elif event.button == 4: self.onMouseWheelOut(1)
+					elif event.button == 5: self.onMouseWheelOut(-1)
 
 			elif event.type == MOUSEBUTTONUP:
-				if not self.isInUneventableZone(event.pos):
-					if self.isInWidget(event.pos):
-						if event.button == 1:   self.onEndClick()
-						elif event.button == 2: self.onEndMiddleClick()
-						elif event.button == 3: self.onEndRightClick()
-						elif event.button == 4: self.onEndMouseWheel(1)
-						elif event.button == 5: self.onEndMouseWheel(-1)
-					else:
-						if event.button == 1:   self.onEndClickOut()
-						elif event.button == 2: self.onEndMiddleClickOut()
-						elif event.button == 3: self.onEndRightClickOut()
-						elif event.button == 4: self.onEndMouseWheelOut(1)
-						elif event.button == 5: self.onEndMouseWheelOut(-1)
+				if self.isInWidget(event.pos):
+					if event.button == 1:   self.onEndClick()
+					elif event.button == 2: self.onEndMiddleClick()
+					elif event.button == 3: self.onEndRightClick()
+					elif event.button == 4: self.onEndMouseWheel(1)
+					elif event.button == 5: self.onEndMouseWheel(-1)
+				else:
+					if event.button == 1:   self.onEndClickOut()
+					elif event.button == 2: self.onEndMiddleClickOut()
+					elif event.button == 3: self.onEndRightClickOut()
+					elif event.button == 4: self.onEndMouseWheelOut(1)
+					elif event.button == 5: self.onEndMouseWheelOut(-1)
 
 	def onHover(self):
 		self.hovered = True
@@ -327,7 +327,7 @@ class Button(Eventable_widget):
 				backgroundName = eventName + "BackgroundImage"
 			else:
 				backgroundName = "backgroundImage"
-			self.backgroundImages[eventName] = resizeImage(
+			self.backgroundImages[eventName] = resize_image(
 				self.gui.get_image(self.kwargs[backgroundName]), \
 				self.kwargs["size"])
 
@@ -476,10 +476,10 @@ class Image_widget(Widget):
 		"""
 
 		if self.kwargs["borderSize"]:
-			self.image = stretchImage(self.image, newSize, \
+			self.image = stretch_image(self.image, newSize, \
 			self.kwargs["borderSize"])
 		else:
-			self.image = resizeImage(self.image, newSize)
+			self.image = resize_image(self.image, newSize)
 		self.kwargs["size"] = tuple(newSize)
 
 	def config(self, **kwargs):
@@ -508,10 +508,10 @@ class Menu_widget(Widget):
 		if self.kwargs["backgroundImage"]:
 			bgs = self.kwargs["backgroundBorderSize"]
 			if bgs:
-				self.backgroundImage = stretchImage(self.gui.get_image(
+				self.backgroundImage = stretch_image(self.gui.get_image(
 					self.kwargs["backgroundImage"]), self.kwargs["size"], bgs)
 			else:
-				self.backgroundImage = resizeImage(self.gui.get_image(
+				self.backgroundImage = resize_image(self.gui.get_image(
 					self.kwargs["backgroundImage"]), self.kwargs["size"])
 
 	def initWidgets(self):
@@ -645,7 +645,7 @@ class Setting_bar(Eventable_widget):
 
 		for imageName in imageNames:
 			if self.kwargs[imageName]:
-				image = stretchImage( \
+				image = stretch_image( \
 					self.gui.get_image(self.kwargs[imageName]), \
 					(self.kwargs["size"][0], self.kwargs["lineThickness"]), \
 					self.kwargs["lineImageBorderSize"])
@@ -659,7 +659,7 @@ class Setting_bar(Eventable_widget):
 
 		for imageName in imageNames:
 			if self.kwargs[imageName]:
-				image = stretchImage( \
+				image = stretch_image( \
 					self.gui.get_image(self.kwargs[imageName]), \
 					(self.kwargs["cursorWidth"], self.kwargs["size"][1]), \
 					self.kwargs["cursorImageBorderSize"])
@@ -704,7 +704,8 @@ class Setting_bar(Eventable_widget):
 		return [x, y + h // 2 - self.kwargs["lineThickness"] // 2]
 
 	def getCursorPos(self):
-		return [self.cursorPos - self.kwargs["cursorWidth"] // 2, realPos[1]]
+		x, y = self.getRealPos()
+		return [self.cursorPos - self.kwargs["cursorWidth"] // 2, y]
 
 	def onEvent(self, event):
 		Eventable_widget.onEvent(self, event)
@@ -798,7 +799,7 @@ class Switch_button(Button):
 
 		for eventName in eventNames:
 			backgroundName = eventName + "BackgroundImage"
-			self.desactivatedBackgroundImages[eventName] = resizeImage(
+			self.desactivatedBackgroundImages[eventName] = resize_image(
 				self.gui.get_image(self.kwargs[backgroundName]), \
 				self.kwargs["size"])
 		Button.loadBackgroundImages(self)

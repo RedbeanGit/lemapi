@@ -6,9 +6,12 @@ Provide useful functions.
 Created on 02/01/2018
 """
 
+from api import stop_app, stop_all_activities
+
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
 
+import importlib
 import json
 import os
 import pygame
@@ -67,7 +70,7 @@ def getScreenRatio():
 	return 1
 
 
-def getMonitorDensity():
+def get_monitor_density():
 	wm, hm = getMonitorSize()
 	wp, hp = getScreenSize()
 	return wp / wm, hp / hm
@@ -77,7 +80,7 @@ def getMonitorDensity():
 ################################################################################
 
 
-def resizeImage(image, newSize):
+def resize_image(image, newSize):
 	"""
 	Resize an image (a pygame surface).
 	This function comes from the Pyoro project.
@@ -96,7 +99,7 @@ def resizeImage(image, newSize):
 	newSize = (int(newSize[0]), int(newSize[1]))
 	return pygame.transform.scale(image, newSize)
 
-def invertImage(image, vertical, horizontal):
+def invert_image(image, vertical, horizontal):
 	"""
 	Revert an image (a pygame surface) as if it was looking into a mirror.
 
@@ -115,7 +118,7 @@ def invertImage(image, vertical, horizontal):
 
 	return pygame.transform.flip(image, vertical, horizontal)
 
-def stretchImage(image, newSize, borderSize):
+def stretch_image(image, newSize, borderSize):
 	"""
 	Resize an image (a pygame surface) but do not deform it. It only resize
 	borders and center as 9-path images. Useful for buttons or gui frames.
@@ -221,8 +224,19 @@ def has_function(module, fct):
 		return c
 	return False
 
+
 def has_variable(module, v):
 	return v in dir(module)
+
+
+def add_modules(path):
+	if os.path.exists(path):
+		sys.path.append(path)
+		files = os.listdir(path)
+		for file in files:
+			nfp = os.path.join(path, file)
+			if os.path.isdir(nfp):
+				sys.path.append(nfp)
 
 ################################################################################
 ### Program useful #############################################################
@@ -230,6 +244,7 @@ def has_variable(module, v):
 
 
 def exit(errorLevel = 0):
+	stop_app()
 	sys.exit(errorLevel)
 
 def getusername():

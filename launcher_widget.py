@@ -22,6 +22,7 @@ class App_widget(Menu_widget, Eventable_widget):
         App_widget.updateDefaultKwargs(kwargs)
         self.app = app
         super().__init__(gui, pos, **kwargs)
+        Eventable_widget.__init__(self, gui, pos, **kwargs)
 
     def initWidgets(self):
         w, h = self.kwargs["size"]
@@ -31,10 +32,14 @@ class App_widget(Menu_widget, Eventable_widget):
         self.addSubWidget("app_border_image", Image_widget, (w * 0.25, h * 0.5), \
             self.kwargs["iconBorderImage"], size=(h * 0.8, h * 0.8), \
             anchor=(0, 0), borderSize=10)
-        self.addSubWidget("app_name_text", Text, (w * 0.60, h * 0.25), \
-            self.app.get_name(), textColor=(0, 0, 0))
-        self.addSubWidget("app_version_text", Text, (w * 0.60, h * 0.5), \
-            "v" + self.app.get_version(), textColor=(0, 0, 0))
+        self.addSubWidget("app_name_text", Text, (w * 0.5, h * 0.25), \
+            self.app.get_name(), textColor=(50, 50, 50))
+        self.addSubWidget("app_version_text", Text, (w * 0.5, h * 0.6), \
+            "v" + self.app.get_version(), textColor=(50, 50, 50), fontSize=16)
+
+    def onEvent(self, event):
+        super().onEvent(event)
+        Eventable_widget.onEvent(self, event)
 
 
 class Notif_widget(Menu_widget):

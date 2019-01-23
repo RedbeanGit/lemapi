@@ -2,8 +2,7 @@
 
 from api import get_gui
 from constants import Path
-from layout import Layout
-from util import read_json, getScreenSize
+from util import read_json
 from widget import Image_widget
 
 __author__ = "Julien Dubois"
@@ -16,14 +15,7 @@ import collections
 class View(object):
     def __init__(self):
         self.widgets = collections.OrderedDict()
-        self.layout = None
-
-    def load_layout(self, template_path):
-        template = read_json(template_path)
-        if template == None:
-            print("[WARNING] [View.load_layout] None template")
-        else:
-            self.layout = Layout(template)
+        self.init_widgets()
 
     def init_widgets(self):
         pass
@@ -43,6 +35,10 @@ class View(object):
         for widget in tuple(self.widgets.values()):
             widget.update()
 
+    def updateEvent(self, event):
+        for widget in tuple(self.widgets.values()):
+            widget.onEvent(event)
+
     def destroy(self):
         for widget in tuple(self.widgets.values()):
             widget.destroy()
@@ -52,10 +48,9 @@ class View(object):
 class Desktop_view(View):
     def __init__(self):
         super().__init__()
-        self.layout = self.load_layout(os.path.join(Path.VIEWS, "desktop.json"))
 
     def init_widgets(self):
-        w, h = getScreenSize()
+        w, h = get_gui().get_size()
         bg_path = os.path.join(Path.IMAGES, "background", "white_degrade.jpg")
         self.add_widget("background_image", Image_widget, (w // 2, h // 2), \
             bg_path, size=(w, h), anchor=(0, 0))

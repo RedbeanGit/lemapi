@@ -6,6 +6,7 @@ from constants import Path
 from event_manager import Event
 from launcher_widget import App_widget, Notif_widget
 from util import getusername, exit
+from system_instance import Instance
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
@@ -21,6 +22,14 @@ class Activity(object):
 
     def update(self, deltatime):
         self.view.update()
+
+    def sleep(self):
+        for event in self.events:
+            event.enable = False
+
+    def wakeup(self):
+        for event in self.events:
+            event.enable = True
 
     def destroy(self):
         self.view.destroy()
@@ -49,8 +58,16 @@ class Desktop_activity(Activity):
 
     def load_icons(self):
         for app in self.apps:
-            self.view.add_widget("%s_app_icon" % app.id, App_widget, (0, 0), \
+            wname = "%s_app_widget" % app.id
+            self.view.add_widget(wname, App_widget, (0, 0), \
             app)
+            event = Event(self.run_app, app)
+            self.view.widgets[wname].clickEvents.append(event)
+
+    def run_app(self, app):
+        Instance.app = app
+        app.start()
+        app.run()
 
     def add_notif(self, title, msg):
         self.view.add_widget("notif", Notif_widget, (0, 0), title, msg)

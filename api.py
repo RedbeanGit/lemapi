@@ -1,36 +1,44 @@
 # -*- coding: utf-8 -*-
 
-from constants import Instance
+from system_instance import Instance
 
-def set_activity(activity):
-    from activity import Activity, Desktop_activity
-    from event_manager import Listener_manager
+def start_activity(activity):
+    print("[INFO] [start_activity] Sleeping %s" % Instance.activities[-1])
+    Instance.activities[-1].sleep()
+    Instance.activities.append(activity)
 
-    if isinstance(activity, Activity):
-        if Instance.activity:
-            if isinstance(Instance.activity, Desktop_activity):
-                print("[INFO] [set_activity] Saving Desktop activity")
-                Instance.backup_activity = Instance.activity
-            else:
-                print("[INFO] [set_activity] Destroying %s" % Instance.activity)
-                Instance.activity.destroy()
 
-        Instance.activity = activity
+def stop_activity():
+    import traceback
+
+    if len(Instance.activities) > 1:
+        print("[INFO] [stop_activity] Destroying activity %s" % \
+            Instance.activities[-1])
+        try:
+            Instance.activities.pop().destroy()
+            Instance.activities[-1].wakeup()
+        except Exception:
+            print("[WARNING] [stop_activity] Something wrong happened while " \
+                + "stopping an activity")
+            traceback.print_exc()
     else:
-        print("[WARNING] [set_activity] %s is not an activity." % activity \
-            + "Activity instance")
+        print("[WARNING] [stop_activity] Unable to destroy Desktop_activity " \
+            + "(main activity)")
 
 
-def destroy_activity():
-    from activity import Desktop_activity
-    from view import Desktop_view
+def stop_all_activities():
+    import traceback
 
-    Instance.activity.destroy()
-    if Instance.backup_activity:
-        Instance.activity = Instance.backup_activity
-    else:
-        view = Desktop_view()
-        Instance.activity = Desktop_activity(view)
+    while len(Instance.activities) > 1:
+        print("[INFO] [stop_activity] Destroying activity %s" % \
+            Instance.activities[-1])
+        try:
+            Instance.activities.pop().destroy()
+        except Exception:
+            print("[WARNING] [stop_all_activities] Something wrong happened " \
+                "while stopping an activity")
+            traceback.print_exc()
+    Instance.activities[0].wakeup()
 
 
 def get_gui():
@@ -49,17 +57,35 @@ def get_listener_manager():
     return Instance.listener_manager
 
 
-def restart_app(app_id):
-    from application import Application
+def get_activity():
+    return Instance.activities[-1]
 
-    for app in Application.apps:
-        if app.id == app_id:
-            app.reload()
-            return True
-    print("[WARNING] [restart_app] No app with id=%s" % app_id)
-    return False
+
+def get_view():
+    return Instance.activities[-1].view
+
+
+def restart_app():
+    if Instance.app:
+        Instance.app.reload()
+    else:
+        print("[WARNING] [restart_app] No app currently running")
+
+
+def stop_app():
+    if Instance.app:
+        Instance.app.exit()
+        Instance.app = None
+    else:
+        print("[WARNING] [stop_app] No app currently running")
+
+
+def get_app_id():
+    if Instance.app:
+        return Instance.app.id
+    return 0
 
 
 def force_view_update():
-    Instance.activity.view.update()
+    Instance.activities[-1].view.update()
     Instance.gui.update()
