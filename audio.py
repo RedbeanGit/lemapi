@@ -26,9 +26,18 @@ class Player(object):
 		self.chunk_size = 1024
 
 		self.pa = pyaudio.PyAudio()
+		self.buffer = bytes(self.get_chunk_size())
 		self.thread = None
 		self.lock = threading.RLock()
 		self.active = False
+
+		self.stream = self.pa.open(
+				format = self.pa.get_format_from_width(
+					self.sample_width),
+				rate = self.framerate,
+				channels = self.nb_channels,
+				output = True
+			)
 
 		self.mixers = []
 		self.sounds = {}
@@ -86,18 +95,20 @@ class Player(object):
 	def update(self):
 		for mixer in self.mixers:
 			mixer.update()
+		self.flush()
+
+	def write(self, chunk):
+		self.buffer = audioop.add(self.buffer, chunk, self.sample_width)
+
+	def flush(self):
+		self.stream.write(self.buffer)
+		self.buffer = bytes(self.get_chunk_size())
 
 
 class Mixer(object):
 	def __init__(self, player):
 		self.player = player
-		self.stream = self.player.pa.open(
-				format = self.player.pa.get_format_from_width(
-					self.player.sample_width),
-				rate = self.player.framerate,
-				channels = self.player.nb_channels,
-				output = True
-			)
+
 		self.sounds = []
 		self.playing = True
 
@@ -121,8 +132,10 @@ class Mixer(object):
 			self.sounds.remove(sound)
 
 	def clear(self):
+		for sound in self.sounds:
+			sound.reset()
 		self.sounds.clear()
-		self.stream.close()
+		self.playing = False
 
 	def play(self):
 		self.playing = True
@@ -162,7 +175,7 @@ class Mixer(object):
 							(self.player.framerate // self.speed),
 							None)[0]
 
-		self.stream.write(mixed_chunk)
+		self.player.write(mixed_chunk)
 
 	def set_speed(self, speed):
 		if speed > 0:
@@ -254,8 +267,6 @@ class Sound(object):
 			self.path = sound.path
 			self.samples = sound.samples
 			self.loaded = True
-		else:
-			print("[WARNING] [Sound.copy] Unable to copy an unloaded sound!")
 
 	def get_chunk(self):
 		chunk_size = self.player.get_chunk_size()
@@ -317,11 +328,14 @@ class Music(Sound):
 			self.wave_file.rewind()
 		super().reset()
 
+	def is_ended(self):
+		if self.loaded:
+			return self.pos >= self.wave_file.getnframes()
+		return False
+
 	def copy(self, sound):
 		if sound.loaded:
 			self.load(sound.path)
-		else:
-			print("[WARNING] [Music.copy] Unable to copy an unloaded sound!")
 
 	def get_chunk(self):
 		chunk_size = self.player.get_chunk_size()
