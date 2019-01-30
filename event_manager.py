@@ -9,6 +9,7 @@ from api import get_view
 from pygame import event
 from pygame.locals import QUIT, KEYDOWN, KEYUP
 
+
 class Listener_manager(object):
     def __init__(self):
         self.listeners = {}

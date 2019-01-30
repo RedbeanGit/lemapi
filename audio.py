@@ -21,7 +21,7 @@ from os.path import exists, join
 class Player(object):
 	def __init__(self):
 		self.nb_channels = 2
-		self.framerate = 44100
+		self.framerate = 22050
 		self.sample_width = 1
 		self.chunk_size = 1024
 
@@ -234,15 +234,20 @@ class Sound(object):
 		if exists(path):
 			try:
 				with wave.open(path, "rb") as wf:
-					if wf.getframerate() == self.player.framerate \
-					and wf.getnchannels() == self.player.nb_channels \
-					and wf.getsampwidth() == self.player.sample_width:
+					framerate = wf.getframerate()
+					nb_channels = wf.getnchannels()
+					sample_width = wf.getsampwidth()
+
+					if framerate == self.player.framerate \
+					and nb_channels == self.player.nb_channels \
+					and sample_width == self.player.sample_width:
 						self.samples = wf.readframes(wf.getnframes() - 1)
 						self.path = path
 						self.loaded = True
 						return True
-					print("[WARNING] [Sound.load] Unmanaged header for '%s'" \
-						% path)
+					print(f"[WARNING] [Sound.load] Unmanaged header for {path}" \
+						+ f" (framerate={framerate}, channels={nb_channels}, " \
+						+ f"sample_width={sample_width})")
 			except Exception:
 				print('[WARNING] [Sound.load] Unable to load "%s"' % self.path)
 		else:
@@ -296,17 +301,21 @@ class Music(Sound):
 
 			try:
 				wf = wave.open(path, "rb")
+				framerate = wf.getframerate()
+				nb_channels = wf.getnchannels()
+				sample_width = wf.getsampwidth()
 
-				if wf.getframerate() == self.player.framerate \
-				and wf.getnchannels() == self.player.nb_channels \
-				and wf.getsampwidth() == self.player.sample_width:
+				if framerate == self.player.framerate \
+				and nb_channels == self.player.nb_channels \
+				and sample_width == self.player.sample_width:
 					self.wave_file = wf
 					self.path = path
 					self.loaded = True
 					return True
 				wf.close()
-				print("[WARNING] [Music.load] Unmanaged header for '%s'" \
-					% path)
+				print(f"[WARNING] [Music.load] Unmanaged header for {path}" \
+					+ f" (framerate={framerate}, channels={nb_channels}, " \
+					+ f"sample_width={sample_width})")
 			except Exception:
 				print('[WARNING] [Music.load] Unable to load "%s"' % self.path)
 		else:
