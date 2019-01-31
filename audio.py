@@ -22,7 +22,7 @@ class Player(object):
 	def __init__(self):
 		self.nb_channels = 2
 		self.framerate = 22050
-		self.sample_width = 1
+		self.sample_width = 2
 		self.chunk_size = 1024
 
 		self.pa = pyaudio.PyAudio()
@@ -30,6 +30,7 @@ class Player(object):
 		self.thread = None
 		self.lock = threading.RLock()
 		self.active = False
+		self.speed = 1
 
 		self.stream = self.pa.open(
 				format = self.pa.get_format_from_width(
@@ -97,10 +98,21 @@ class Player(object):
 			mixer.update()
 		self.flush()
 
+	def set_speed(self, speed):
+		if speed > 0:
+			self.speed = speed
+
 	def write(self, chunk):
 		self.buffer = audioop.add(self.buffer, chunk, self.sample_width)
 
 	def flush(self):
+		self.buffer = audioop.ratecv(self.buffer, \
+			self.sample_width, \
+			self.nb_channels, \
+			self.framerate, \
+			int(self.framerate / self.speed),
+			None)[0]
+
 		self.stream.write(self.buffer)
 		self.buffer = bytes(self.get_chunk_size())
 
@@ -114,7 +126,6 @@ class Mixer(object):
 
 		self.sound_volume = 1
 		self.music_volume = 1
-		self.speed = 1
 
 	def __contains__(self, obj):
 		return obj in self.sounds
@@ -133,7 +144,7 @@ class Mixer(object):
 
 	def clear(self):
 		for sound in self.sounds:
-			sound.reset()
+			sound.stop()
 		self.sounds.clear()
 		self.playing = False
 
@@ -168,18 +179,7 @@ class Mixer(object):
 							traceback.print_exc()
 							sound.unload()
 
-						mixed_chunk = audioop.ratecv(mixed_chunk, \
-							self.player.sample_width, \
-							self.player.nb_channels, \
-							self.player.framerate, \
-							(self.player.framerate // self.speed),
-							None)[0]
-
 		self.player.write(mixed_chunk)
-
-	def set_speed(self, speed):
-		if speed > 0:
-			self.speed = speed
 
 	def set_sound_volume(self, volume):
 		if volume >= 0 and volume <= 1:
@@ -284,7 +284,7 @@ class Sound(object):
 			chunk = self.samples[sample_pos:sample_pos+chunk_size]
 			self.pos += self.player.chunk_size
 
-			return chunk + bytes(chunk_size - len(sample))
+			return chunk + bytes(chunk_size - len(chunk))
 
 		return bytes(chunk_size)
 
