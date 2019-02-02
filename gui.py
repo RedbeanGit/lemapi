@@ -59,6 +59,12 @@ class GUI(object):
             self.root_surface.fill(color, rect)
             self.updated_rect.append(rect)
 
+    def draw_background_color(self, color):
+        if self.root_surface:
+            rect = ((0, 0), self.get_size())
+            self.root_surface.fill(color)
+            self.updated_rect.append(rect)
+
     def draw_polygon(self, color, pos):
         if self.root_surface:
             x = min(pos, key=lambda p: p[0])[0]

@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from activity import Desktop_activity
+from activity import Splash_activity
 from api import stop_all_activities
 from audio import Player
 from event_manager import Listener_manager
 from gui import GUI
 from system_instance import Instance
+from task_manager import Task_manager
 from util import exit
-from view import Desktop_view
+from view import Splash_view
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
@@ -28,15 +29,16 @@ def main():
 
         Instance.gui = GUI()
         Instance.gui.create_root_surface()
-        Instance.gui.load_images()
 
         Instance.listener_manager = Listener_manager()
+        Instance.task_manager = Task_manager()
+
         Instance.audio_player = Player()
         Instance.audio_player.play()
 
-        view = Desktop_view()
+        view = Splash_view()
         view.init_widgets()
-        Instance.activities.append(Desktop_activity(view))
+        Instance.activities.append(Splash_activity(view))
 
         clock = pygame.time.Clock()
 
@@ -46,6 +48,7 @@ def main():
 
             try:
                 Instance.listener_manager.update()
+                Instance.task_manager.update(deltatime)
                 Instance.activities[-1].update(deltatime)
             except Exception:
                 stop_all_activities()

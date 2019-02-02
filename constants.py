@@ -14,5 +14,6 @@ class Path(object):
     DATA = "data"
     IMAGES = join(DATA, "images")
     GUI = join(IMAGES, "gui")
-    VIEWS = join(DATA, "views")
+    AUDIO = join(DATA, "audio")
+    MUSIC = join(AUDIO, "music")
     GAMES = join("/", "home", "{user}", "games")

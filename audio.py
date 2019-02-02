@@ -249,9 +249,9 @@ class Sound(object):
 						+ f" (framerate={framerate}, channels={nb_channels}, " \
 						+ f"sample_width={sample_width})")
 			except Exception:
-				print('[WARNING] [Sound.load] Unable to load "%s"' % self.path)
+				print('[WARNING] [Sound.load] Unable to load "%s"' % path)
 		else:
-			print('[WARNING] [Sound.load] Unable to find "%s"' % self.path)
+			print('[WARNING] [Sound.load] Unable to find "%s"' % path)
 		return False
 
 	def unload(self):
@@ -317,9 +317,9 @@ class Music(Sound):
 					+ f" (framerate={framerate}, channels={nb_channels}, " \
 					+ f"sample_width={sample_width})")
 			except Exception:
-				print('[WARNING] [Music.load] Unable to load "%s"' % self.path)
+				print('[WARNING] [Music.load] Unable to load "%s"' % path)
 		else:
-			print('[WARNING] [Music.load] Unable to find "%s"' % self.path)
+			print('[WARNING] [Music.load] Unable to find "%s"' % path)
 		return False
 
 	def unload(self):

@@ -57,6 +57,14 @@ def get_listener_manager():
     return Instance.listener_manager
 
 
+def get_task_manager():
+    from task_manager import Task_manager
+
+    if not Instance.task_manager:
+        Instance.task_manager = Task_manager()
+    return Instance.task_manager
+
+
 def get_activity():
     return Instance.activities[-1]
 

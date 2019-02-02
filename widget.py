@@ -152,8 +152,11 @@ class Eventable_widget(Widget):
 		self.rightClicked = False
 		self.wheelEvents = []
 
+		self.lastEvent = None
+
 	def onEvent(self, event):
 		if self.kwargs["enable"]:
+			self.lastEvent = event
 			if event.type == MOUSEMOTION:
 				if self.isInWidget(event.pos):
 					self.onHover()
@@ -420,7 +423,8 @@ class Image_widget(Widget):
 
 	DEFAULT_KWARGS = {
 		"size": (0, 0),
-		"borderSize": 0
+		"borderSize": 0,
+		"alphaChannel": True
 	}
 
 	def __init__(self, gui, pos, imagePath, **kwargs):
@@ -451,7 +455,7 @@ class Image_widget(Widget):
 		:param imagePath: The filepath to the image to load.
 		"""
 
-		self.image = self.gui.get_image(imagePath)
+		self.image = self.gui.get_image(imagePath, self.kwargs["alphaChannel"])
 		self.kwargs["size"] = self.image.get_size()
 
 	def update(self):
@@ -481,6 +485,9 @@ class Image_widget(Widget):
 		else:
 			self.image = resize_image(self.image, newSize)
 		self.kwargs["size"] = tuple(newSize)
+
+	def set_opacity(self, opacity):
+		self.image.set_alpha(int(opacity))
 
 	def config(self, **kwargs):
 		Widget.config(self, **kwargs)
