@@ -114,11 +114,11 @@ class Clock_widget(Text):
 
     def __init__(self, gui, pos, **kwargs):
         Clock_widget.updateDefaultKwargs(kwargs)
-        super().__init__(gui, pos, "{hour}:{minute}", **kwargs)
+        super().__init__(gui, pos, "00:00", **kwargs)
 
     def update(self):
         dt = datetime.datetime.now()
-        self.text = f"{dt.hour}:{dt.minute}"
+        self.text = "%s:%s" % (dt.hour, dt.minute)
         super().update()
 
 

@@ -33,7 +33,9 @@ def stop_all_activities():
         print("[INFO] [stop_activity] Destroying activity %s" % \
             Instance.activities[-1])
         try:
-            Instance.activities.pop().destroy()
+            activity = Instance.activities.pop()
+            print("[INFO] [stop_all_activities] Destroying activity %s" % activity)
+            activity.destroy()
         except Exception:
             print("[WARNING] [stop_all_activities] Something wrong happened " \
                 "while stopping an activity")

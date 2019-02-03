@@ -120,23 +120,18 @@ class Player(object):
 class Mixer(object):
 	def __init__(self, player):
 		self.player = player
-
 		self.sounds = []
 		self.playing = True
-
-		self.sound_volume = 1
-		self.music_volume = 1
+		self.volume = 1
 
 	def __contains__(self, obj):
 		return obj in self.sounds
 
 	def add_sound(self, sound):
 		self.sounds.append(sound)
-		sound.volume = self.sound_volume
 
 	def add_music(self, music):
 		self.sounds.append(music)
-		music.volume = self.music_volume
 
 	def remove_sound(self, sound):
 		if sound in self.sounds:
@@ -171,8 +166,9 @@ class Mixer(object):
 						chunk = sound.get_chunk()
 
 						try:
-							mixed_chunk = audioop.add(mixed_chunk, chunk, \
-								self.player.sample_width)
+							mixed_chunk = audioop.add(mixed_chunk, audioop.mul( \
+								chunk, self.player.sample_width, sound.volume * \
+								self.volume), self.player.sample_width)
 						except Exception:
 							print("[WARNING] [Mixer.update] Something wrong " \
 								"happened when adding 2 audio chunks")
@@ -181,21 +177,9 @@ class Mixer(object):
 
 		self.player.write(mixed_chunk)
 
-	def set_sound_volume(self, volume):
+	def set_volume(self, volume):
 		if volume >= 0 and volume <= 1:
-			self.sound_volume = volume
-
-			for sound in self.sounds:
-				if not isinstance(sound, Music):
-					sound.volume = volume
-
-	def set_music_volume(self, volume):
-		if volume >= 0 and volume <= 1:
-			self.music_volume = volume
-
-			for sound in self.sounds:
-				if isinstance(sound, Music):
-					sound.volume = volume
+			self.volume = volume
 
 
 class Sound(object):
@@ -245,9 +229,9 @@ class Sound(object):
 						self.path = path
 						self.loaded = True
 						return True
-					print(f"[WARNING] [Sound.load] Unmanaged header for {path}" \
-						+ f" (framerate={framerate}, channels={nb_channels}, " \
-						+ f"sample_width={sample_width})")
+					print("[WARNING] [Sound.load] Unmanaged header for %s" % \
+						path + " (framerate=%s, channels=%s, " % (framerate, \
+						nb_channels) + "sample_width=%s)" % sample_width)
 			except Exception:
 				print('[WARNING] [Sound.load] Unable to load "%s"' % path)
 		else:
@@ -313,9 +297,9 @@ class Music(Sound):
 					self.loaded = True
 					return True
 				wf.close()
-				print(f"[WARNING] [Music.load] Unmanaged header for {path}" \
-					+ f" (framerate={framerate}, channels={nb_channels}, " \
-					+ f"sample_width={sample_width})")
+				print("[WARNING] [Sound.load] Unmanaged header for %s" % \
+					path + " (framerate=%s, channels=%s, " % (framerate, \
+					nb_channels) + "sample_width=%s)" % sample_width)
 			except Exception:
 				print('[WARNING] [Music.load] Unable to load "%s"' % path)
 		else:
