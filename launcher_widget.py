@@ -2,12 +2,14 @@
 
 from constants import Path
 from widget import Menu_widget, Text, Widget, Eventable_widget, Image_widget
+from util import rotate_image, resize_image
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
 
 import datetime
 import math
+import time
 from os.path import join
 
 
@@ -30,10 +32,11 @@ class App_widget(Menu_widget, Eventable_widget):
         w, h = self.kwargs["size"]
         self.gui.load_image(self.app.get_icon_path())
         self.addSubWidget("app_icon_image", Image_widget, (w * 0.25, h * 0.5), \
-            self.app.get_icon_path(), size=(h * 0.75, h * 0.75), anchor=(0, 0))
-        self.addSubWidget("app_border_image", Image_widget, (w * 0.25, h * 0.5), \
-            self.kwargs["iconBorderImage"], size=(h * 0.8, h * 0.8), \
-            anchor=(0, 0), borderSize=10)
+            self.app.get_icon_path(), size=(h * 0.75, h * 0.75), anchor=(0, 0), \
+            antialiasing=False)
+        #self.addSubWidget("app_border_image", Image_widget, (w * 0.25, h * 0.5), \
+        #    self.kwargs["iconBorderImage"], size=(h * 0.8, h * 0.8), \
+        #    anchor=(0, 0), borderSize=10)
         self.addSubWidget("app_name_text", Text, (w * 0.5, h * 0.25), \
             self.app.get_name(), textColor=(50, 50, 50))
         self.addSubWidget("app_version_text", Text, (w * 0.5, h * 0.6), \
@@ -44,21 +47,78 @@ class App_widget(Menu_widget, Eventable_widget):
         Eventable_widget.onEvent(self, event)
 
 
+class Splash_labyrinth(Widget):
+
+    DEFAULT_KWARGS = {
+        "size": (380, 380),
+        "labyrinthPart1": join(Path.IMAGES, "splash", "labyrinth_part_1.png"),
+        "labyrinthPart2": join(Path.IMAGES, "splash", "labyrinth_part_2.png"),
+        "labyrinthPart3": join(Path.IMAGES, "splash", "labyrinth_part_3.png")
+    }
+
+    def __init__(self, gui, pos, **kwargs):
+        Splash_labyrinth.updateDefaultKwargs(kwargs)
+        self.angle = 0
+        self.backgrounds = []
+        self.last_time = time.time()
+        self.rotate = False
+
+        super().__init__(gui, pos, **kwargs)
+        self.load_backgrounds()
+
+    def load_backgrounds(self):
+        self.backgrounds.append(resize_image(self.gui.get_image( \
+            self.kwargs["labyrinthPart1"]), self.kwargs["size"]))
+        self.backgrounds.append(resize_image(self.gui.get_image( \
+            self.kwargs["labyrinthPart2"]), self.kwargs["size"]))
+        self.backgrounds.append(resize_image(self.gui.get_image( \
+            self.kwargs["labyrinthPart3"]), self.kwargs["size"]))
+
+    def update(self):
+        if self.backgrounds:
+            if self.rotate:
+                elapsed = time.time() - self.last_time
+                self.angle += elapsed * 200
+
+            w, h = self.kwargs["size"]
+
+            for i in range(3):
+                x, y = self.getRealPos()
+                if i % 2:
+                    surface = rotate_image(self.backgrounds[i], int(self.angle))
+                else:
+                    surface = rotate_image(self.backgrounds[i], -int(self.angle))
+                sw, sh = surface.get_size()
+                x -= (sw - w) / 2
+                y -= (sh - h) / 2
+                self.gui.draw_image(surface, (x, y))
+            self.last_time = time.time()
+        super().update()
+
+
+
 class App_group(Eventable_widget):
 
     DEFAULT_KWARGS = {
         "size": (600, 600),
-        "nbAppVisible": 3
+        "nbAppVisible": 3,
+        "backgroundImage": join(Path.GUI, "labyrinth.png")
     }
 
     def __init__(self, gui, pos, **kwargs):
         App_group.updateDefaultKwargs(kwargs)
         self.app_widgets = []
+        self.background = None
         self.visible_app_index = 0
         self.angle = 1
         self.last_mouse_pos = []
 
         super().__init__(gui, pos, **kwargs)
+        self.load_background()
+
+    def load_background(self):
+        self.background = resize_image(self.gui.get_image( \
+            self.kwargs["backgroundImage"]), self.kwargs["size"])
 
     def add_app_widget(self, app_widget):
         if isinstance(app_widget, App_widget):
@@ -69,6 +129,15 @@ class App_group(Eventable_widget):
             self.app_widgets.remove(app_widget)
 
     def update(self):
+        if self.background:
+            x, y = self.getRealPos()
+            w, h = self.kwargs["size"]
+            surface = rotate_image(self.background, self.angle * 180)
+            sw, sh = surface.get_size()
+            x -= (sw - w) / 2
+            y -= (sh - h) / 2
+            self.gui.draw_image(surface, (x, y))
+
         angle_app = 1 / 2 / self.kwargs["nbAppVisible"]
         radius = min(self.kwargs["size"]) / 2
         visible_apps = self.app_widgets[self.visible_app_index : \

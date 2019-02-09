@@ -47,13 +47,13 @@ class Player(object):
 		snd = Sound(self)
 		self.sounds[path] = snd
 		if snd.load(path):
-			print("[INFO] [Player.load_sound] Sound '%s' loaded" % path)
+			print("[lemapi] [INFO] [Player.load_sound] Sound '%s' loaded" % path)
 
 	def load_music(self, path):
 		msc = Music(self)
 		self.sounds[path] = msc
 		if msc.load(path):
-			print("[INFO] [Player.load_music] Sound '%s' loaded" % path)
+			print("[lemapi] [INFO] [Player.load_music] Sound '%s' loaded" % path)
 
 	def get_sound(self, path):
 		snd = Sound(self)
@@ -85,6 +85,7 @@ class Player(object):
 		self.active = True
 		self.thread = threading.Thread(target=loop)
 		self.thread.start()
+		print("[lemapi] [INFO] [Player.play] Audio started !")
 
 	def stop(self):
 		if self.active and self.thread:
@@ -92,6 +93,7 @@ class Player(object):
 			self.thread.join()
 			for mixer in self.mixers:
 				mixer.clear()
+			print("[lemapi] [INFO] [Player.stop] Audio stopped successfully !")
 
 	def update(self):
 		for mixer in self.mixers:
@@ -170,8 +172,8 @@ class Mixer(object):
 								chunk, self.player.sample_width, sound.volume * \
 								self.volume), self.player.sample_width)
 						except Exception:
-							print("[WARNING] [Mixer.update] Something wrong " \
-								"happened when adding 2 audio chunks")
+							print("[lemapi] [WARNING] [Mixer.update] Something " \
+								+ "wrong happened when mixing 2 audio chunks")
 							traceback.print_exc()
 							sound.unload()
 
@@ -229,13 +231,15 @@ class Sound(object):
 						self.path = path
 						self.loaded = True
 						return True
-					print("[WARNING] [Sound.load] Unmanaged header for %s" % \
-						path + " (framerate=%s, channels=%s, " % (framerate, \
-						nb_channels) + "sample_width=%s)" % sample_width)
+					print("[lemapi] [WARNING] [Sound.load] Unmanaged header for " \
+						+ "%s" % path + " (framerate=%s, channels=%s, " % \
+						(framerate, nb_channels) + "sample_width=%s)" % \
+						sample_width)
 			except Exception:
-				print('[WARNING] [Sound.load] Unable to load "%s"' % path)
+				print('[lemapi] [WARNING] [Sound.load] Unable to load "%s"' % \
+					path)
 		else:
-			print('[WARNING] [Sound.load] Unable to find "%s"' % path)
+			print('[lemapi] [WARNING] [Sound.load] Unable to find "%s"' % path)
 		return False
 
 	def unload(self):
@@ -297,13 +301,14 @@ class Music(Sound):
 					self.loaded = True
 					return True
 				wf.close()
-				print("[WARNING] [Sound.load] Unmanaged header for %s" % \
-					path + " (framerate=%s, channels=%s, " % (framerate, \
+				print("[lemapi] [WARNING] [Sound.load] Unmanaged header for %s" \
+					% path + " (framerate=%s, channels=%s, " % (framerate, \
 					nb_channels) + "sample_width=%s)" % sample_width)
 			except Exception:
-				print('[WARNING] [Music.load] Unable to load "%s"' % path)
+				print('[lemapi] [WARNING] [Music.load] Unable to load "%s"' % \
+					path)
 		else:
-			print('[WARNING] [Music.load] Unable to find "%s"' % path)
+			print('[lemapi] [WARNING] [Music.load] Unable to find "%s"' % path)
 		return False
 
 	def unload(self):

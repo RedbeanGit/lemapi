@@ -66,7 +66,7 @@ def getScreenRatio():
 	w, h = getScreenSize()
 	if h:
 		return w / h
-	print("[WARNING] [util.getScreenRatio] Height can't be null")
+	print("[lemapi] [WARNING] [util.getScreenRatio] Height can't be 0")
 	return 1
 
 
@@ -80,7 +80,7 @@ def get_monitor_density():
 ################################################################################
 
 
-def resize_image(image, newSize):
+def resize_image(image, newSize, antialiasing=True):
 	"""
 	Resize an image (a pygame surface).
 	This function comes from the Pyoro project.
@@ -92,11 +92,17 @@ def resize_image(image, newSize):
 	:param newSize: The new size of the image in a (width, height) tuple where
 		width and height are integers.
 
+	:type antialiasing: bool
+	:param antialiasing: (Optional). Use antialiasing algorithms to resize image.
+		Default is True.
+
 	:rtype: pygame.surface.Surface
 	:returns: A new pygame surface with the given size.
 	"""
 
 	newSize = (int(newSize[0]), int(newSize[1]))
+	if antialiasing:
+		return pygame.transform.smoothscale(image, newSize)
 	return pygame.transform.scale(image, newSize)
 
 def invert_image(image, vertical, horizontal):
@@ -177,6 +183,9 @@ def stretch_image(image, newSize, borderSize):
 		borderSize, newSideLength[1] + borderSize))
 	return back
 
+def rotate_image(image, angle):
+	return pygame.transform.rotate(image, angle)
+
 ################################################################################
 ### File operations ############################################################
 ################################################################################
@@ -229,14 +238,38 @@ def has_variable(module, v):
 	return v in dir(module)
 
 
-def add_modules(path):
+def add_module_path(path):
 	if os.path.exists(path):
 		sys.path.append(path)
 		files = os.listdir(path)
+
 		for file in files:
 			nfp = os.path.join(path, file)
 			if os.path.isdir(nfp):
 				sys.path.append(nfp)
+
+
+def load_module(path):
+	directory, script = os.path.split(path)
+	module_name, ext = os.path.splitext(script)
+	module = None
+
+	if ext in (".py", ".pyc", ".pyd", ".pyw"):
+		add_module_path(directory)
+
+		# Temporarly changing path to import module
+		old_path = os.getcwd()
+		os.chdir(directory)
+		# Importing the module
+		module = importlib.import_module(module_name)
+		os.chdir(old_path)
+
+	return module
+
+
+def reload_module(module):
+	importlib.reload(module)
+
 
 ################################################################################
 ### Program useful #############################################################

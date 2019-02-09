@@ -8,7 +8,7 @@ Created on 28/03/2018
 """
 
 from constants import Path
-from util import resize_image, stretch_image
+from util import resize_image, stretch_image, rotate_image
 
 __author__ = "Julien Dubois"
 __version__ = "1.1.2"
@@ -424,7 +424,9 @@ class Image_widget(Widget):
 	DEFAULT_KWARGS = {
 		"size": (0, 0),
 		"borderSize": 0,
-		"alphaChannel": True
+		"alphaChannel": True,
+		"antialiasing": True,
+		"transparentColor": None
 	}
 
 	def __init__(self, gui, pos, imagePath, **kwargs):
@@ -446,6 +448,7 @@ class Image_widget(Widget):
 
 		if tmp_size != (0, 0):
 			self.resize(tmp_size)
+		self.rotated_overflow = [0, 0]
 
 	def loadImage(self, imagePath):
 		"""
@@ -456,6 +459,8 @@ class Image_widget(Widget):
 		"""
 
 		self.image = self.gui.get_image(imagePath, self.kwargs["alphaChannel"])
+		if self.kwargs["transparentColor"]:
+			self.image.set_colorkey(self.kwargs["transparentColor"])
 		self.kwargs["size"] = self.image.get_size()
 
 	def update(self):
@@ -483,8 +488,20 @@ class Image_widget(Widget):
 			self.image = stretch_image(self.image, newSize, \
 			self.kwargs["borderSize"])
 		else:
-			self.image = resize_image(self.image, newSize)
+			self.image = resize_image(self.image, newSize, \
+				self.kwargs["antialiasing"])
 		self.kwargs["size"] = tuple(newSize)
+
+	def rotate(self, angle):
+		self.image = rotate_image(self.image, angle)
+		w, h = self.kwargs["size"]
+		sw, sh = self.image.get_size()
+		self.rotated_overflow = [(sw - w) / 2, (sh - h) / 2]
+
+	def getRealPos(self):
+		x, y = super().getRealPos()
+		xo, yo = self.rotated_overflow
+		return (x - xo, y - yo)
 
 	def set_opacity(self, opacity):
 		self.image.set_alpha(int(opacity))
@@ -492,7 +509,7 @@ class Image_widget(Widget):
 	def config(self, **kwargs):
 		Widget.config(self, **kwargs)
 		if "size" in kwargs:
-			self.resize(kwargs["size"])
+			self.resize(kwargs["size"], self.kwargs["antialiasing"])
 
 
 class Menu_widget(Widget):

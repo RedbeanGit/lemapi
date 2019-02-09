@@ -2,7 +2,7 @@
 
 from api import get_gui
 from constants import Path
-from launcher_widget import App_group, Clock_widget
+from launcher_widget import App_group, Clock_widget, Splash_labyrinth
 from util import read_json
 from widget import Image_widget, Text
 
@@ -51,18 +51,21 @@ class Splash_view(View):
         gui = get_gui()
         w, h = gui.get_size()
 
-        labyrinth_path = os.path.join(Path.IMAGES, "splash", "labyrinth.png")
-        gui.load_image(labyrinth_path)
+        gui.load_image(os.path.join(Path.IMAGES, "splash", "labyrinth_part_1.png"))
+        gui.load_image(os.path.join(Path.IMAGES, "splash", "labyrinth_part_2.png"))
+        gui.load_image(os.path.join(Path.IMAGES, "splash", "labyrinth_part_3.png"))
+        self.add_widget("labyrinth_widget", Splash_labyrinth, (w // 2, h // 2), \
+            size=(h * 0.8, h * 0.8), anchor=(0, 0))
 
-        self.add_widget("labyrinth_image", Image_widget, (w // 2, h // 2), \
-            labyrinth_path, size=(h * 0.8, h * 0.8), anchor=(0, 0), \
-            alphaChannel=False)
-        self.add_widget("title_text", Text, (w // 2, h // 2), "LemAPI", \
-            anchor=(0, 0), fontSize=75, textColor=(255, 255, 255, 0))
-        self.add_widget("loading_text", Text, (w // 2, h * 0.9), "Démarrage...", \
+        path = os.path.join(Path.IMAGES, "splash", "lem_logo.png")
+        gui.load_image(path)
+        self.add_widget("title_image", Image_widget, (w // 2, h // 2), \
+            path, size=(h * 0.4, h * 0.4), anchor=(0, 0), alphaChannel=False, \
+            transparentColor=(0, 0, 0))
+        self.widgets["title_image"].set_opacity(0)
+
+        self.add_widget("loading_text", Text, (w // 2, h * 0.95), "Démarrage...", \
             anchor=(0, 0), fontSize=20, textColor=(75, 75, 75, 0))
-
-        self.widgets["labyrinth_image"].set_opacity(0)
 
     def update(self):
         get_gui().draw_background_color((255, 255, 255))

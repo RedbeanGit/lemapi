@@ -8,7 +8,7 @@ from event_manager import Event
 from launcher_widget import App_widget, Notif_widget
 from system_instance import Instance
 from task_manager import Analog_task_delay, Task_delay
-from util import getusername, exit
+from util import getusername, exit, rotate_image
 from view import Desktop_view
 
 __author__ = "Julien Dubois"
@@ -44,12 +44,14 @@ class Splash_activity(Activity):
         self.mixer = None
 
         tm = get_task_manager()
-        tm.add_task("start_appear_background", Task_delay(0.8, \
-            self.start_appear_background))
+        tm.add_task("start_background_rotate", Task_delay(0.8, \
+            self.start_background_rotate))
         tm.add_task("start_appear_title", Task_delay(3.8, self.start_appear_title))
         tm.add_task("load_resources", Task_delay(8.5, self.load_resources))
 
         self.init_mixer()
+        print("[lemapi] [INFO] [Splash_activity.__init__] Activity started " \
+            + "successfully !")
 
     def init_mixer(self):
         ap = get_audio_player()
@@ -62,10 +64,6 @@ class Splash_activity(Activity):
         music.play()
         self.mixer.add_music(music)
 
-    def start_appear_background(self):
-        get_task_manager().add_task("appear_background", Analog_task_delay(2, \
-            self.appear_background))
-
     def start_appear_title(self):
         get_task_manager().add_task("appear_title", Analog_task_delay(1.5, \
             self.appear_title))
@@ -74,6 +72,9 @@ class Splash_activity(Activity):
         get_task_manager().add_task("appear_loading", Analog_task_delay(1.5, \
             self.appear_loading))
 
+    def start_background_rotate(self):
+        self.view.widgets["labyrinth_widget"].rotate = True
+
     def load_resources(self):
         self.start_appear_loading()
         get_gui().load_images()
@@ -81,12 +82,8 @@ class Splash_activity(Activity):
         tm.add_task("create_desktop", \
             Task_delay(7, self.create_desktop))
 
-    def appear_background(self, value):
-        self.view.widgets["labyrinth_image"].set_opacity(value * 255)
-
     def appear_title(self, value):
-        self.view.widgets["title_text"].config(textColor=(255, 255, 255, \
-            int(value * 255)))
+        self.view.widgets["title_image"].set_opacity(value * 255)
 
     def appear_loading(self, value):
         self.view.widgets["loading_text"].config(textColor=(75, 75, 75, \
@@ -105,6 +102,8 @@ class Desktop_activity(Activity):
         self.load_apps()
         self.load_icons()
         self.initEvents()
+        print("[lemapi] [INFO] [Desktop_activity.__init__] Activity started " \
+            + "successfully !")
 
     def initEvents(self):
         lmgr = get_listener_manager()
@@ -130,8 +129,10 @@ class Desktop_activity(Activity):
                 self.view.widgets[wname])
 
     def run_app(self, app):
+        print("[lemapi] [INFO] [Desktop_activity.run_app] Running app " \
+            + "'%s' from lemapi desktop" % app.get_name())
         Instance.app = app
-        app.start()
+        app.load()
         app.run()
 
     def add_notif(self, title, msg):

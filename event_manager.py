@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from api import get_view
 from util import exit
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
 
-from api import get_view
 from pygame import event
 from pygame.locals import QUIT, KEYDOWN, KEYUP
 

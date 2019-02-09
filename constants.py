@@ -8,6 +8,7 @@ from os.path import join
 
 class App(object):
     NAME = "Lem Launcher"
+    GPIO_ENABLE = False
 
 
 class Path(object):

@@ -2,13 +2,11 @@
 
 from api import stop_all_activities
 from constants import Path
-from util import read_json, getusername, add_modules
+from util import read_json, getusername, load_module, reload_module
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
 
-from importlib import reload
-from os.path import exists, join, splitext
 import os
 import sys
 import traceback
@@ -26,40 +24,37 @@ class Application(object):
 		self.path = path
 		self.id = Application.nb_apps
 		self.infos = self.load_infos()
-		print("[INFO] [Application.__init__] New app created " \
+		self.app_module = None
+
+		print("[lemapi] [INFO] [Application.__init__] New app created " \
 			+ "(path=%s, id=%s, name=%s, version=%s)" % (self.path, self.id, \
 			self.get_name(), self.get_version()))
-		self.reset()
-
-	def reset(self):
-		self.app_module = None
-		self.initable = False
-		self.exitable = False
 
 	def load_infos(self):
-		infos = read_json(join(self.path, "manifest.json"))
+		infos = read_json(os.path.join(self.path, "manifest.json"))
 		if infos:
 			return infos
 		return {}
 
-	def start(self):
+	def load(self):
 		if "main_file" in self.infos:
-			main = self.infos["main_file"]
-			module = splitext(main)[0]
-			if exists(join(self.path, main)):
-				add_modules(self.path)
-				os.chdir(self.path)
+			print("[lemapi] [INFO] [Application.load] Loading app '%s'" % \
+				self.get_name())
 
-				try:
-					exec("import %s" % module)
-					exec("self.app_module = %s" % module)
-				except ImportError:
-					print("[WARNING] [Application.start] Unable to import main" \
-						+ " module of '%s'" % self.infos.get("name", "unknownApp"))
-					traceback.print_exc()
+			script = self.infos["main_file"]
+			try:
+				self.app_module = load_module(os.path.join(self.path, script))
+			except Exception:
+				print("[lemapi] [WARNING] [Application.load] Unable to import " \
+					+ "main module of '%s'" % self.get_name())
+				traceback.print_exc()
 
-				self.initable = self.is_initable()
-				self.exitable = self.is_exitable()
+	def reload(self):
+		if self.app_module:
+			reload_module(self.app_module)
+		else:
+			print("[lemapi] [WARNING] [Application.reload] App '%s'" % \
+				self.get_name() + " not loaded yet!")
 
 	def has_function(self, fct):
 		if fct in dir(self.app_module):
@@ -70,58 +65,44 @@ class Application(object):
 			return c
 		return False
 
-	def reload(self):
-		if self.app_module:
-			reload(self.app_module)
-
-	def is_initable(self):
-		if self.app_module:
-			return self.has_function("main")
-		return False
-
-	def is_exitable(self):
-		if self.app_module:
-			return self.has_function("exit")
-		return False
-
 	def get_name(self):
 		return self.infos.get("name", "unknownApp")
 
 	def get_icon_path(self):
-		return join(self.path, self.infos.get("icon_path", "."))
+		return os.path.join(self.path, self.infos.get("icon_path", "."))
 
 	def get_version(self):
 		return self.infos.get("version", "0.0.0")
 
 	def run(self):
-		if self.initable:
+		if self.has_function("main"):
 			try:
 				self.app_module.main(self.id)
 			except Exception:
-				print("[WARNING] [Application.run] Something wrong happened on" \
-					+ " call of main function (app=%s)" % self.get_name())
+				print("[lemapi] [WARNING] [Application.run] Something wrong " \
+					"happened on call of main function (app=%s)" % \
+					self.get_name())
 				traceback.print_exc()
 				self.exit()
 
 	def exit(self):
-		if self.exitable:
+		if self.has_function("exit"):
 			try:
 				self.app_module.exit()
 			except Exception as e:
-				print("[WARNING] [Application.exit] Something wrong happened" \
-					+ " on call of exit function (app=%s error=%s)" % ( \
+				print("[lemapi] [WARNING] [Application.exit] Something wrong " \
+					"happened on call of exit function (app=%s error=%s)" % ( \
 					self.get_name(), e))
 		self.kill()
 
 	def kill(self):
 		stop_all_activities()
-		self.reset()
 
 	@staticmethod
 	def get_local_apps():
 		path = Path.GAMES.format(user=getusername())
-		if not exists(path):
+		if not os.path.exists(path):
 			os.makedirs(path)
 		games = os.listdir(path)
-		return [join(path, g) for g in games if "manifest.json" in \
-			os.listdir(join(path, g))]
+		return [os.path.join(path, g) for g in games if "manifest.json" in \
+			os.listdir(os.path.join(path, g))]

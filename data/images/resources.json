@@ -1,6 +1,6 @@
 [
   ["background", "white_degrade.jpg"],
   ["gui", "button", "button_click.png"],
-  ["gui", "app_border.png"],
-  ["gui", "app_frame.png"]
+  ["gui", "app_frame.png"],
+  ["gui", "labyrinth.png"]
 ]
