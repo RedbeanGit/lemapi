@@ -18,25 +18,23 @@ class App_widget(Menu_widget, Eventable_widget):
     DEFAULT_KWARGS = {
         "backgroundImage": join(Path.GUI, "app_frame.png"),
         "backgroundBorderSize": 30,
-        "iconBorderImage": join(Path.GUI, "app_border.png"),
         "size": (300, 80)
     }
 
     def __init__(self, gui, pos, app, **kwargs):
         App_widget.updateDefaultKwargs(kwargs)
         self.app = app
+
         super().__init__(gui, pos, **kwargs)
         Eventable_widget.__init__(self, gui, pos, **kwargs)
 
     def initWidgets(self):
         w, h = self.kwargs["size"]
         self.gui.load_image(self.app.get_icon_path())
+
         self.addSubWidget("app_icon_image", Image_widget, (w * 0.25, h * 0.5), \
             self.app.get_icon_path(), size=(h * 0.75, h * 0.75), anchor=(0, 0), \
             antialiasing=False)
-        #self.addSubWidget("app_border_image", Image_widget, (w * 0.25, h * 0.5), \
-        #    self.kwargs["iconBorderImage"], size=(h * 0.8, h * 0.8), \
-        #    anchor=(0, 0), borderSize=10)
         self.addSubWidget("app_name_text", Text, (w * 0.5, h * 0.25), \
             self.app.get_name(), textColor=(50, 50, 50))
         self.addSubWidget("app_version_text", Text, (w * 0.5, h * 0.6), \
@@ -78,7 +76,7 @@ class Splash_labyrinth(Widget):
         if self.backgrounds:
             if self.rotate:
                 elapsed = time.time() - self.last_time
-                self.angle += elapsed * 200
+                self.angle += elapsed * 250
 
             w, h = self.kwargs["size"]
 

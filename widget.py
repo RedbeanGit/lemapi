@@ -151,6 +151,7 @@ class Eventable_widget(Widget):
 		self.rightClickEvents = []
 		self.rightClicked = False
 		self.wheelEvents = []
+		self.stateEvents = []
 
 		self.lastEvent = None
 
@@ -190,6 +191,12 @@ class Eventable_widget(Widget):
 					elif event.button == 3: self.onEndRightClickOut()
 					elif event.button == 4: self.onEndMouseWheelOut(1)
 					elif event.button == 5: self.onEndMouseWheelOut(-1)
+
+	def update(self):
+		for event in self.stateEvents:
+			event.call(self.hovered, self.clicked, self.middleClicked, \
+				self.rightClicked)
+		super().update()
 
 	def onHover(self):
 		self.hovered = True

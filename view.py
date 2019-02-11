@@ -54,6 +54,7 @@ class Splash_view(View):
         gui.load_image(os.path.join(Path.IMAGES, "splash", "labyrinth_part_1.png"))
         gui.load_image(os.path.join(Path.IMAGES, "splash", "labyrinth_part_2.png"))
         gui.load_image(os.path.join(Path.IMAGES, "splash", "labyrinth_part_3.png"))
+
         self.add_widget("labyrinth_widget", Splash_labyrinth, (w // 2, h // 2), \
             size=(h * 0.8, h * 0.8), anchor=(0, 0))
 

@@ -4,6 +4,7 @@
 from activity import Splash_activity
 from api import stop_all_activities
 from audio import Player
+from constants import Path
 from event_manager import Listener_manager
 from gui import GUI
 from system_instance import Instance
@@ -43,7 +44,6 @@ def main():
 
         print("[lemapi] [INFO] [main] Creating first activity ...")
         view = Splash_view()
-        view.init_widgets()
         Instance.activities.append(Splash_activity(view))
 
         clock = pygame.time.Clock()

@@ -3,7 +3,8 @@
 __author__ = "Julien Dubois"
 __version = "0.1.0"
 
-from os.path import join
+import sys
+from os.path import join, dirname, abspath
 
 
 class App(object):
@@ -12,7 +13,8 @@ class App(object):
 
 
 class Path(object):
-    DATA = "data"
+    ROOT = dirname(abspath(sys.argv[0]))
+    DATA = join(ROOT, "data")
     IMAGES = join(DATA, "images")
     GUI = join(IMAGES, "gui")
     AUDIO = join(DATA, "audio")
