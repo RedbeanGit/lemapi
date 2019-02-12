@@ -7,5 +7,18 @@
   ["gui", "button", "button_middle_click.png"],
   ["gui", "button", "button_right_click.png"],
   ["gui", "button", "button.png"],
-  ["gui", "labyrinth.png"]
+  ["gui", "frame.png"],
+  ["gui", "labyrinth.png"],
+  ["gui", "switch button", "switch_activated_click.png"],
+  ["gui", "switch button", "switch_activated_disable.png"],
+  ["gui", "switch button", "switch_activated_hover.png"],
+  ["gui", "switch button", "switch_activated_middle_click.png"],
+  ["gui", "switch button", "switch_activated_right_click.png"],
+  ["gui", "switch button", "switch_activated.png"],
+  ["gui", "switch button", "switch_desactivated_click.png"],
+  ["gui", "switch button", "switch_desactivated_disable.png"],
+  ["gui", "switch button", "switch_desactivated_hover.png"],
+  ["gui", "switch button", "switch_desactivated_middle_click.png"],
+  ["gui", "switch button", "switch_desactivated_right_click.png"],
+  ["gui", "switch button", "switch_desactivated.png"]
 ]
