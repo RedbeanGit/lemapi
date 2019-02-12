@@ -33,8 +33,7 @@ class App_widget(Menu_widget, Eventable_widget):
         self.gui.load_image(self.app.get_icon_path())
 
         self.addSubWidget("app_icon_image", Image_widget, (w * 0.25, h * 0.5), \
-            self.app.get_icon_path(), size=(h * 0.75, h * 0.75), anchor=(0, 0), \
-            antialiasing=False)
+            self.app.get_icon_path(), size=(h * 0.75, h * 0.75), anchor=(0, 0))
         self.addSubWidget("app_name_text", Text, (w * 0.5, h * 0.25), \
             self.app.get_name(), textColor=(50, 50, 50))
         self.addSubWidget("app_version_text", Text, (w * 0.5, h * 0.6), \
