@@ -19,7 +19,7 @@ class GUI(object):
     def create_root_surface(self):
         print("[lemapi] [INFO] [GUI.create_root_surface] Creating display " \
             + "surface (800x480 manual)")
-        self.root_surface = pygame.display.set_mode((800, 480))#, pygame.FULLSCREEN)
+        self.root_surface = pygame.display.set_mode(App.SCREEN_SIZE)#, pygame.FULLSCREEN)
         pygame.display.set_caption(App.NAME)
 
     def load_images(self):

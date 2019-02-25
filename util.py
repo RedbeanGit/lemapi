@@ -279,6 +279,7 @@ def reload_module(module):
 def exit(errorLevel = 0):
 	stop_app()
 	stop_audio_player()
+	print("[lemapi] [INFO] [exit] LemAPI stopped successfully!")
 	sys.exit(errorLevel)
 
 def getusername():

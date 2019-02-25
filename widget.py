@@ -7,7 +7,9 @@ These classes have been adpated from the Pyoro project.
 Created on 28/03/2018
 """
 
+from api import request_keyboard, close_keyboard
 from constants import Path
+from event_manager import Event
 from util import resize_image, stretch_image, rotate_image
 
 __author__ = "Julien Dubois"
@@ -18,7 +20,15 @@ import os
 import pygame.freetype
 
 from os.path import join
-from pygame.locals import MOUSEMOTION, MOUSEBUTTONDOWN, MOUSEBUTTONUP
+from pygame.locals import MOUSEMOTION, MOUSEBUTTONDOWN, MOUSEBUTTONUP, KEYDOWN, \
+	KEYUP, K_BACKSPACE, K_TAB, K_CLEAR, K_RETURN, K_PAUSE, K_ESCAPE, K_SPACE, \
+	K_EXCLAIM, K_QUOTEDBL, K_HASH, K_DOLLAR, K_AMPERSAND, K_QUOTE, K_LEFTPAREN, \
+	K_RIGHTPAREN, K_ASTERISK, K_PLUS, K_COMMA, K_MINUS, K_PERIOD, K_SLASH, K_0, \
+	K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9, K_COLON, K_SEMICOLON, K_LESS, \
+	K_EQUALS, K_GREATER, K_QUESTION, K_AT, K_LEFTBRACKET, K_BACKSLASH, \
+	K_RIGHTBRACKET, K_CARET, K_UNDERSCORE, K_BACKQUOTE, K_a, K_b, K_c, K_d, K_e, \
+	K_f, K_g, K_h, K_i, K_j, K_k, K_l, K_m, K_n, K_o, K_p, K_q, K_r, K_s, K_t, \
+	K_u, K_v, K_w, K_x, K_y, K_z, K_LSHIFT, K_EURO
 
 
 class Widget:
@@ -143,12 +153,16 @@ class Eventable_widget(Widget):
 		Widget.__init__(self, gui, pos, **kwargs)
 
 		self.hoverEvents = []
+		self.endHoverEvents = []
 		self.hovered = False
 		self.clickEvents = []
+		self.endClickEvents = []
 		self.clicked = False
 		self.middleClickEvents = []
+		self.endMiddleClickEvents = []
 		self.middleClicked = False
 		self.rightClickEvents = []
+		self.endRightClickEvents = []
 		self.rightClicked = False
 		self.wheelEvents = []
 		self.stateEvents = []
@@ -205,15 +219,23 @@ class Eventable_widget(Widget):
 
 	def onEndHover(self):
 		self.hovered = False
+		for event in self.endHoverEvents:
+			event.call()
 
 	def onClick(self):
 		self.clicked = True
+		for event in self.clickEvents:
+			event.call()
 
 	def onMiddleClick(self):
 		self.middleClicked = True
+		for event in self.middleClickEvents:
+			event.call()
 
 	def onRightClick(self):
 		self.rightClicked = True
+		for event in self.rightEvents:
+			event.call()
 
 	def onMouseWheel(self, direction):
 		for event in self.wheelEvents:
@@ -234,19 +256,19 @@ class Eventable_widget(Widget):
 	def onEndClick(self):
 		if self.clicked:
 			self.clicked = False
-			for event in self.clickEvents:
+			for event in self.endClickEvents:
 				event.call()
 
 	def onEndMiddleClick(self):
 		if self.middleClicked:
 			self.middleClicked = False
-			for event in self.middleClickEvents:
+			for event in self.endMiddleClickEvents:
 				event.call()
 
 	def onEndRightClick(self):
 		if self.rightClicked:
 			self.rightClicked = False
-			for event in self.rightClickEvents:
+			for event in self.endRightClickEvents:
 				event.call()
 
 	def onEndMouseWheel(self, direction):
@@ -424,6 +446,87 @@ class Clickable_text(Text, Eventable_widget):
 		else:
 			self.font.fgcolor = self.kwargs["textColor"]
 		Text.update(self)
+
+
+class Editable_text(Clickable_text):
+
+	DEFAULT_KWARGS = {
+		"hintText": "",
+		"inputType": str,
+		"hintTextColor": (255, 255, 255, 100),
+		"cursorWidth": 2,
+		"cursorColor": (0, 0, 0)
+	}
+
+	def __init__(self, gui, pos, text, **kwargs):
+		self.isEditing = False
+		self.cursor = 0
+
+		Editable_text.updateDefaultKwargs(kwargs)
+		Clickable.__init__(self, gui, pos, self.kwargs["hintText"], **kwargs)
+
+	def update(self):
+		if not self.text:
+			self.font.fgcolor = self.kwargs["hintTextColor"]
+			surface, rect = self.font.render(str(self.kwargs["hint"]), \
+				bgcolor=self.kwargs["backgroundColor"])
+		else:
+			self.font.fgcolor = self.kwargs["textColor"]
+			surface, rect = self.font.render(str(self.text), \
+				bgcolor=self.kwargs["backgroundColor"])
+
+			if not self.isEditing:
+				if not self.kwargs["enable"]:
+					self.font.fgcolor = self.kwargs["disableTextColor"]
+				elif self.clicked:
+					self.font.fgcolor = self.kwargs["onClickTextColor"]
+				elif self.rightClicked:
+					self.font.fgcolor = self.kwargs["onRightClickTextColor"]
+				elif self.middleClicked:
+					self.font.fgcolor = self.kwargs["onMiddleClickTextColor"]
+				elif self.hovered:
+					self.font.fgcolor = self.kwargs["onHoverTextColor"]
+				else:
+					self.font.fgcolor = self.kwargs["textColor"]
+
+		rp = self.getRealPos()
+		if self.isEditing:
+			self.gui.draw_line(self.kwargs["cursorColor"], rp[0] + rect.width, \
+				rp[1] + rect.height, width=self.kwargs["cursorWidth"])
+
+		self.gui.draw_image(surface, rp)
+		Widget.update(self)
+
+	def startTyping(self):
+		self.isEditing = True
+		request_keyboard()
+
+	def stopTyping(self):
+		self.isEditing = False
+		close_keyboard()
+
+	def onClick(self):
+		Clickable_text.onClick(self)
+		if not self.isEditing:
+			self.startTyping()
+
+	def onEvent(self, event):
+		Clickable_text.onEvent(self, event)
+
+		if self.isEditing:
+			if event.type == KEYDOWN:
+				if event.key == K_BACKSPACE:
+					self.text = self.text[:-1]
+				elif event.type == K_RETURN:
+					self.stopTyping()
+				else:
+					self.text += pygame.key.name(event.type)
+
+	def config(self, **kwargs):
+		if "inputType" in kwargs:
+			if not callable(kwargs["inputType"]):
+				kwargs["inputType"] = self.kwargs["inputType"]
+		Clickable_text.config(self, **kwargs)
 
 
 class Image_widget(Widget):
@@ -618,6 +721,175 @@ class Menu_widget(Widget):
 			x, y = widget.pos
 			widget.setPos((x + vx, y + vy))
 		Widget.setPos(self, pos)
+
+
+class Virtual_keyboard(Menu_widget):
+
+	DEFAULT_KWARGS = {
+		"size": (800, 150),
+		"buttonMargin": 5,
+		"backgroundImage": join(Path.GUI, "keyboard_background.png")
+	}
+
+	def __init__(self, gui, pos, **kwargs):
+		self.buttons = []
+		self.isShowing = False
+		self.isShifted = False
+		self.isSpecial = False
+
+		Virtual_keyboard.updateDefaultKwargs(kwargs)
+		Menu_widget.__init__(self, gui, pos, **kwargs)
+		self.initEvents()
+		self.setLetterLayout()
+
+	def initWidgets(self):
+		w, h = self.kwargs["size"]
+		m = self.kwargs["buttonMargin"]
+		w = w - m * 2
+		h = h - m * 2
+		nb = (int(w * 0.1), int(h * 0.25))
+		bb = (int(w * 0.15), int(h * 0.25))
+
+		for i in range(10):
+			self.addSubWidget(i, Button, (m + nb[0] * i, m), \
+				text="-", size=(nb[0] - m * 2, nb[1] - m * 2))
+
+		for i in range(10, 20):
+			self.addSubWidget(i, Button, (m + nb[0] * i, nb[1] + m), \
+				text="-", size=(nb[0] - m * 2, nb[1] - m * 2))
+
+		for i in range(20, 27):
+			self.addSubWidget(char, Button, (bb[0] + m + nb[0] * i, nb[1] * 2 + \
+				m), text=char, size=(nb[0] - m * 2, nb[1] - m * 2))
+
+		self.addSubWidget("maj", Button, (m, nb[1] * 2 + m), text="Maj", \
+			size=(bb[0] - m * 2, bb[1] - m * 2))
+		self.addSubWidget("backspace", Button, (w - bb[0] + m, nb[1] * 2 + m), \
+			text="< ", size=(bb[0] - m * 2, bb[1] - m * 2))
+		self.addSubWidget("special", Button, (m, nb[1] * 2 + bb[1] + m), \
+			text="?123", size=(bb[0] - m * 2, bb[1] - m * 2))
+		self.addSubWidget("enter", Button, (w - bb[0] + m, nb[1] * 2 + \
+			bb[1] + m), text="Entrer", size=(bb[0] - m * 2, bb[1] - m * 2))
+		self.addSubWidget("space", Button, (m + bb[0] + nb[0] * 2, nb[1] * 2 + \
+			bb[1] + m), text="Espace", size=(nb[0] * 4 - m * 2, nb[1] - m * 2))
+
+		self.addSubWidget(27, Button, (m + bb[0], nb[1] * 2 + bb[1] + \
+			m),	text=",", size=(nb[0] - m * 2, nb[1] - m * 2))
+		self.addSubWidget(28, Button, (m + bb[0] + nb[0], nb[1] * 2 + \
+			bb[1] + m), text="!", size=(nb[0] - m * 2, nb[1] - m * 2))
+		self.addSubWidget(29, Button, (m + bb[0] + nb[0] * 5, nb[1] * 2 \
+			+ bb[1] + m), text=".", size=(nb[0] - m * 2, nb[1] - m * 2))
+
+	def keys(self):
+		names = [i for i in range(30)] + ["maj", "backspace", "special", \
+			"enter", "space"]
+		for name in names:
+			yield name
+
+	def initEvents(self):
+		for key in self.keys():
+			event = Event(self.onKeyPress, key)
+			self.subWidgets[key].clickEvents.append(event)
+			event = Event(self.onKeyRelease, key)
+			self.subWidgets[key].endClickEvents.append(event)
+
+	def setLetterLayout(self):
+		letters = ("a", "z", "e", "r", "t", "y", "u", "i", "o", "p", \
+			"q", "s", "d", "f", "g", "h", "j", "k", "l", "m", \
+			"w", "x", "c", "v", "b", "n", "'", ",", "!", ".", \
+			"Maj", "< ", "?123", "Entrer", "Espace")
+
+		for key, name in enumerate(self.keys()):
+			self.subWidgets[name].config(text=letters[key])
+
+	def setMajLetterLayout(self):
+		letters = ("A", "Z", "E", "R", "T", "Y", "U", "I", "O", "P", \
+			"Q", "S", "D", "F", "G", "H", "J", "K", "L", "M", \
+			"W", "X", "C", "V", "B", "N", "?", ",", "!", ".", \
+			"MAJ", "< ", "?123", "ENTRER", "ESPACE")
+
+		for key, name in enumerate(self.keys()):
+			self.subWidgets[name].config(text=letters[key])
+
+	def setSpecialLayout(self):
+		letters = ("1", "2", "3", "4", "5", "6", "7", "8", "9", "0", \
+			"@", "#", "€", "_", "&", "-", "+", "(", ")", "/", \
+			"*", '"', "'", ":", ";", "!", "?", ",", "!", ".", \
+			"=\\<", "< ", "ABC", "Entrer", "Espace")
+
+		for key, name in enumerate(self.keys()):
+			self.subWidgets[name].config(text=letters[key])
+
+	def setMajSpecialLayout(self):
+		letters = ("1", "2", "3", "4", "5", "6", "7", "8", "9", "0", \
+			"?", ";", ":", "_", "&", "-", "$", "{", "}", "\\", \
+			"<", ">", "=", "^", "`", "[", "]", ",", "!", ".", \
+			"?123", "< ", "ABC", "Entrer", "Espace")
+
+		for key, name in enumerate(self.keys()):
+			self.subWidgets[name].config(text=letters[key])
+
+	def onKeyPress(self, key):
+		if key == "maj":
+			if self.isSpecial:
+				if self.isShifted:
+					self.setSpecialLayout()
+				else:
+					self.setMajSpecialLayout()
+			else:
+				if self.isShifted:
+					self.setLetterLayout()
+				else:
+					self.setMajLetterLayout()
+			self.isShifted = not self.isShifted
+
+		elif key == "special":
+			self.isShifted = False
+			if self.isSpecial:
+				self.setLetterLayout()
+			else:
+				self.setSpecialLayout()
+			self.isSpecial = not self.isSpecial
+
+		pygame_key = Virtual_keyboard.getKeyFromChar(key)
+		if pygame_key:
+			pygame.event.post(pygame.event.Event(KEYDOWN, unicode=key, \
+				key=pygame_key, mod=0))
+
+	def onKeyRelease(self, key):
+		pygame_key = Virtual_keyboard.getKeyFromChar(key)
+		if pygame_key:
+			pygame.event.post(pygame.event.Event(KEYUP, unicode=key, \
+				key=pygame_key, mod=0))
+
+	def update(self):
+		if self.isShowing:
+			Menu_widget.update(self)
+
+	def show(self):
+		self.isShowing = True
+
+	def hide(self):
+		self.isShowing = False
+
+	@staticmethod
+	def getKeyFromChar(char):
+		chars = {"1": K_1, "2": K_2, "3": K_3, "4": K_4, "5": K_5, "6": K_6, \
+			"7": K_7, "8": K_8, "9": K_9, "0": K_0, "a": K_a, "z": K_z, "e": K_e, \
+			"r": K_r, "t": K_t, "y": K_y, "u": K_u, "i": K_i, "o": K_o, "p": K_p, \
+			"q": K_q, "s": K_s, "d": K_d, "f": K_f, "g": K_g, "h": K_h, "j": K_j, \
+			"k": K_k, "l": K_l, "m": K_m, "maj": K_LSHIFT, "w": K_w, "x": K_x, \
+			"c": K_c, "v": K_v, "b": K_b, "n": K_n, "'": K_QUOTE, ",": K_COMMA, \
+			"!": K_EXCLAIM, ".": K_PERIOD, "?": K_QUESTION, "@": K_AT, \
+			"#": K_HASH, "€": K_EURO, "_": K_UNDERSCORE, "&": K_AMPERSAND, \
+			"-": K_MINUS, "+": K_PLUS, "(": K_LEFTPAREN, ")": K_RIGHTPAREN, \
+			"/": K_SLASH, "*": K_ASTERISK, '"': K_QUOTEDBL, ":": K_COLON, \
+			";": K_SEMICOLON, "`": K_BACKQUOTE, "backspace": K_BACKSPACE, \
+			"space": K_SPACE, "enter": K_RETURN}
+		char = char.lower()
+		if char in chars:
+			return chars[char]
+		return 0
 
 
 class Setting_bar(Eventable_widget):

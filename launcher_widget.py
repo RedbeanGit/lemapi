@@ -148,9 +148,13 @@ class App_group(Eventable_widget):
 
     def update_angle(self):
         if self.clicked and self.last_mouse_pos:
-            self.angle += math.asin((self.lastEvent.pos[1] - \
-                self.last_mouse_pos[1]) / abs(self.lastEvent.pos[0] - \
-                self.pos[0]) / math.pi)
+            try:
+                self.angle += math.asin((self.lastEvent.pos[1] - \
+                    self.last_mouse_pos[1]) / abs(self.lastEvent.pos[0] - \
+                    self.pos[0]) / math.pi)
+            except ValueError:
+                print("[lemapi] [WARNING] [App_group.update_angle] Bad position" \
+                    + " (domain error)")
             self.last_mouse_pos = list(self.lastEvent.pos)
 
     def onHover(self):

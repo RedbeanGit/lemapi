@@ -10,6 +10,7 @@ from system_instance import Instance
 from task_manager import Analog_task_delay, Task_delay
 from util import getusername, exit, rotate_image
 from view import Desktop_view
+from widget import Virtual_keyboard
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
@@ -108,7 +109,7 @@ class Desktop_activity(Activity):
     def initEvents(self):
         lmgr = get_listener_manager()
         event = Event(exit)
-        lmgr.add_key_down_event(event, K_LCTRL, K_ESCAPE)
+        lmgr.km.add_key_down_event(event, K_LCTRL, K_ESCAPE)
 
     def load_apps(self):
         apps = Application.get_local_apps()
@@ -124,7 +125,7 @@ class Desktop_activity(Activity):
             self.view.add_widget(wname, App_widget, (0, 0), \
             app, anchor=(0, 0))
             event = Event(self.run_app, app)
-            self.view.widgets[wname].clickEvents.append(event)
+            self.view.widgets[wname].endClickEvents.append(event)
             self.view.widgets["app_group"].add_app_widget( \
                 self.view.widgets[wname])
 

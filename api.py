@@ -137,3 +137,29 @@ def get_app_path(appId=None):
 def force_view_update():
     Instance.activities[-1].view.update()
     Instance.gui.update()
+
+
+def request_keyboard():
+    from constants import App
+    from widget import Virtual_keyboard
+
+    view = get_view()
+
+    if "<system>_virtual_keyboard" not in view.widgets:
+        view.add_widget("<system>_virtual_keyboard", Virtual_keyboard, \
+            (App.SCREEN_SIZE[0] * 0.5, App.SCREEN_SIZE[1]), anchor=(0, 1))
+
+    view.widgets["<system>_virtual_keyboard"].show()
+
+
+def close_keyboard():
+    from constants import App
+    from widget import Virtual_keyboard
+
+    view = get_view()
+
+    if "<system>_virtual_keyboard" not in view.widgets:
+        view.add_widget("<system>_virtual_keyboard", Virtual_keyboard, \
+            (App.SCREEN_SIZE[0] * 0.5, App.SCREEN_SIZE[1]), anchor=(0, 1))
+
+    view.widgets["<system>_virtual_keyboard"].hide()
