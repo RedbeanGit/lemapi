@@ -39,10 +39,14 @@ class Keyboard_manager(object):
         self.lm = listener_manager
         self.current_states = []
 
-    def add_key_down_event(self, event, key, *modifiers):
+    def add_key_down_event(self, event, key, *modifiers, copy=True):
+        if copy:
+            event = event.get_copy()
         self.lm.add_listener(event, KEYDOWN, key, *modifiers)
 
-    def add_key_up_event(self, event, key, *modifiers):
+    def add_key_up_event(self, event, key, *modifiers, copy=True):
+        if copy:
+            event = event.get_copy()
         self.lm.add_listener(event, KEYUP, key, *modifiers)
 
     def update(self):
@@ -99,24 +103,25 @@ class Control_manager(object):
             self.current_states = {
                 "joy_x": 0,
                 "joy_y": 0,
-                "button_joy": False,
-                "button_a": False,
-                "button_b": False,
-                "button_x": False,
-                "button_y": False,
             }
         else:
             self.joystick = {}
             self.buttons = {}
             self.current_states = {}
 
-    def add_button_pressed_event(self, event, button, *modifiers):
+    def add_button_pressed_event(self, event, button, *modifiers, copy=True):
+        if copy:
+            event = event.get_copy()
         self.lm.add_listener(event, JOYBUTTONDOWN, button, *modifiers)
 
-    def add_button_released_event(self, event, button, *modifiers):
+    def add_button_released_event(self, event, button, *modifiers, copy=True):
+        if copy:
+            event = event.get_copy()
         self.lm.add_listener(event, JOYBUTTONUP, button, *modifiers)
 
-    def add_joy_motion_event(self, event):
+    def add_joy_motion_event(self, event, copy=True):
+        if copy:
+            event = event.get_copy()
         self.lm.add_listener(event, JOYAXISMOTION)
 
     def update(self):
@@ -149,23 +154,23 @@ class Control_manager(object):
             for name in ("joy_x", "joy_y"):
                 self.current_states[name] = self.joystick[name].value * 2 - 1
 
-            for name in ("button_joy", "button_a", "button_b", "button_x", \
-                "button_y"):
-                self.current_states[name] = self.buttons[name].is_pressed
-
     def get_pressed_buttons(self):
         return [name for name, button in self.buttons.items() if \
             button.is_pressed]
 
     @staticmethod
     def has_all_button_pressed(seq, subseq):
-        it = iter(subseq)
-        return all(c in it for c in seq)
+        for item in subseq:
+            if item not in seq:
+                return False
+        return True
 
     @staticmethod
     def has_all_button_released(seq, subseq):
-        it = iter(subseq)
-        return all(c not in it for c in seq)
+        for item in subseq:
+            if item in seq:
+                return False
+        return True
 
 
 class Event(object):
@@ -181,3 +186,6 @@ class Event(object):
 
         if self.enable:
             self.fct(*nargs, *self.args, **nkwargs, **self.kwargs)
+
+    def get_copy(self):
+        return Event(self.fct, *self.args, **self.kwargs)
