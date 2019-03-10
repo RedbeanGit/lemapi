@@ -93,6 +93,7 @@ class Application(object):
 				print("[lemapi] [WARNING] [Application.exit] Something wrong " \
 					"happened on call of exit function (app=%s error=%s)" % ( \
 					self.get_name(), e))
+				traceback.print_exc()
 		self.kill()
 
 	def kill(self):
