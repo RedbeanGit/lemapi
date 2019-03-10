@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+from api import get_task_manager, get_view
 from constants import Path
 from widget import Menu_widget, Text, Widget, Eventable_widget, Image_widget
+from task_manager import Analog_task_delay
 from util import rotate_image, resize_image
 
 __author__ = "Julien Dubois"
@@ -188,7 +190,7 @@ class Clock_widget(Text):
 
     def update(self):
         dt = datetime.datetime.now()
-        self.text = "%s:%s" % (dt.hour, dt.minute)
+        self.text = "%02d:%02d" % (dt.hour, dt.minute)
         super().update()
 
 
@@ -196,5 +198,32 @@ class Notif_widget(Menu_widget):
     pass
 
 
-class Toast_widget(Widget):
-    pass
+class Toast_widget(Text):
+
+    DEFAULT_KWARGS = {
+        "duration": 5,
+        "anchor": (0, 0),
+        "view_id": "toast",
+        "textColor": (100, 100, 100, 255),
+    }
+
+    def __init__(self, gui, pos, text, **kwargs):
+        Toast_widget.updateDefaultKwargs(kwargs)
+        super().__init__(gui, pos, text, **kwargs)
+
+        self.fade_task = Analog_task_delay(self.kwargs["duration"], self.fade)
+        self.last_fade_value = 0
+
+        get_task_manager().add_task("fade_toast_%s" % self.kwargs["view_id"], \
+            self.fade_task)
+
+    def fade(self, value):
+        r, g, b, a = self.kwargs["textColor"]
+        a = a - 255 * (value - self.last_fade_value)
+        self.last_fade_value = value
+        if a <= 0:
+            a = 0
+            get_view().remove_widget(self.kwargs["view_id"])
+            get_task_manager().remove_task("fade_toast_%s" % \
+                self.kwargs["view_id"])
+        self.config(textColor=(r, g, b, a))

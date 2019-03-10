@@ -120,18 +120,19 @@ def get_app_id():
     return 0
 
 
-def get_app_path(appId=None):
+def get_app_path(app_id=None):
     from application import Application
+    from constants import Path
 
-    if appId == 0:
-        return os.path.dirname(os.path.abspath(sys.argv[0]))
-    if appId == None and Instance.app:
-        appId = Instance.app.id
-    if appId <= len(Application.apps) and appId > 0:
-        return Application.apps[appId - 1].path
+    if app_id == 0:
+        return Path.ROOT
+    if app_id == None and Instance.app:
+        app_id = Instance.app.id
+    if app_id <= len(Application.apps) and app_id > 0:
+        return Application.apps[app_id - 1].path
     else:
         print("[lemapi] [WARNING] [get_app_path] No app with id=%s found!" % \
-            appId)
+            app_id)
 
 
 def force_view_update():
@@ -158,8 +159,22 @@ def close_keyboard():
 
     view = get_view()
 
-    if "<system>_virtual_keyboard" not in view.widgets:
-        view.add_widget("<system>_virtual_keyboard", Virtual_keyboard, \
+    if "virtual_keyboard" not in view.widgets:
+        view.add_widget("virtual_keyboard", Virtual_keyboard, \
             (App.SCREEN_SIZE[0] * 0.5, App.SCREEN_SIZE[1]), anchor=(0, 1))
 
     view.widgets["<system>_virtual_keyboard"].hide()
+
+
+def get_save_path(app_id=None):
+    if app_id == 0:
+        name = "lemapi_desktop"
+    elif app_id == None and Instance.app:
+        name = Instance.app.get_name()
+    elif app_id <= len(Application.apps) and app_id > 0:
+        name = Application.apps[app_id - 1].get_name()
+
+    path = os.path.abspath(os.path.join("~", "saves", name))
+    if not os.path.exists(path):
+        os.mkdir(path)
+    return path

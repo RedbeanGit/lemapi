@@ -5,12 +5,14 @@ from constants import Path
 from launcher_widget import App_group, Clock_widget, Splash_labyrinth
 from util import read_json
 from widget import Image_widget, Text
+from launcher_widget import Toast_widget
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
 
 import os
 import collections
+import random
 
 
 class View(object):
@@ -26,6 +28,14 @@ class View(object):
             self.widgets[wname].destroy()
         gui = get_gui()
         self.widgets[wname] = wtype(gui, pos, *wargs, **wkargs)
+
+    def add_toast(self, message, **kwargs):
+        name = "toast_%s_%s" % (message, random.random())
+        if "view_id" in kwargs:
+            kwargs.pop("view_id")
+            
+        self.widgets[name] = Toast_widget(get_gui(), (400, 400), message, \
+            view_id=name, **kwargs)
 
     def remove_widget(self, wname):
         if wname in self.widgets:
