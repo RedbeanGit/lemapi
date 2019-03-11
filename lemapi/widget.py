@@ -7,10 +7,10 @@ These classes have been adpated from the Pyoro project.
 Created on 28/03/2018
 """
 
-from api import request_keyboard, close_keyboard
-from constants import Path
-from event_manager import Event
-from util import resize_image, stretch_image, rotate_image
+from lemapi.api import request_keyboard, close_keyboard
+from lemapi.constants import Path
+from lemapi.event_manager import Event
+from lemapi.util import resize_image, stretch_image, rotate_image
 
 __author__ = "Julien Dubois"
 __version__ = "1.1.2"

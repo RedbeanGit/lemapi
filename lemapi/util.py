@@ -6,7 +6,7 @@ Provide useful functions.
 Created on 02/01/2018
 """
 
-from api import stop_app, stop_all_activities, stop_audio_player
+from lemapi.api import stop_app, stop_all_activities, stop_audio_player
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"

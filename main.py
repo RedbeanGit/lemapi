@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from activity import Splash_activity
-from api import stop_all_activities
-from audio import Player
-from constants import Path
-from event_manager import Listener_manager
-from gui import GUI
-from system_instance import Instance
-from task_manager import Task_manager
-from util import exit
-from view import Splash_view
+from lemapi.api import stop_all_activities
+from lemapi.audio import Player
+from lemapi.constants import Path
+from lemapi.event_manager import Listener_manager
+from lemapi.gui import GUI
+from lemapi.system_instance import Instance
+from lemapi.task_manager import Task_manager
+from lemapi.util import exit
+
+from lemapi_desktop.activity import Splash_activity
+from lemapi_desktop.view import Splash_view
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"

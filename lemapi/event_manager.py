@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from api import get_view
-from constants import GPIO, App
-from util import exit
+from lemapi.api import get_view
+from lemapi.constants import GPIO, App
+from lemapi.util import exit
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"

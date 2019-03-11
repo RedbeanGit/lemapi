@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from api import get_task_manager, get_view
-from constants import Path
-from widget import Menu_widget, Text, Widget, Eventable_widget, Image_widget
-from task_manager import Analog_task_delay
-from util import rotate_image, resize_image
-
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
 
 import datetime
 import math
 import time
+
+from lemapi.api import get_task_manager, get_view
+from lemapi.constants import Path
+from lemapi.widget import Menu_widget, Text, Widget, Eventable_widget, \
+    Image_widget
+from lemapi.task_manager import Analog_task_delay
+from lemapi.util import rotate_image, resize_image
+
 from os.path import join
 
 

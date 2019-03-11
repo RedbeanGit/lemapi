@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from api import stop_all_activities
-from constants import Path
-from util import read_json, getusername, load_module, reload_module
+from lemapi.api import stop_all_activities
+from lemapi.constants import Path
+from lemapi.util import read_json, getusername, load_module, reload_module
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"

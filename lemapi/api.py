@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from system_instance import Instance
+from lemapi.system_instance import Instance
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
@@ -50,7 +50,7 @@ def stop_all_activities():
 
 
 def get_gui():
-    from gui import GUI
+    from lemapi.gui import GUI
 
     if not Instance.gui:
         Instance.gui = GUI()
@@ -58,7 +58,7 @@ def get_gui():
 
 
 def get_listener_manager():
-    from event_manager import Listener_manager
+    from lemapi.event_manager import Listener_manager
 
     if not Instance.listener_manager:
         Instance.listener_manager = Listener_manager()
@@ -66,7 +66,7 @@ def get_listener_manager():
 
 
 def get_task_manager():
-    from task_manager import Task_manager
+    from lemapi.task_manager import Task_manager
 
     if not Instance.task_manager:
         Instance.task_manager = Task_manager()
@@ -82,7 +82,7 @@ def get_view():
 
 
 def get_audio_player():
-    from audio import Player
+    from lemapi.audio import Player
 
     if not Instance.audio_player:
         Instance.audio_player = Player()
@@ -121,8 +121,8 @@ def get_app_id():
 
 
 def get_app_path(app_id=None):
-    from application import Application
-    from constants import Path
+    from lemapi.application import Application
+    from lemapi.constants import Path
 
     if app_id == 0:
         return Path.ROOT
@@ -141,8 +141,8 @@ def force_view_update():
 
 
 def request_keyboard():
-    from constants import App
-    from widget import Virtual_keyboard
+    from lemapi.constants import App
+    from lemapi.widget import Virtual_keyboard
 
     view = get_view()
 
@@ -154,8 +154,8 @@ def request_keyboard():
 
 
 def close_keyboard():
-    from constants import App
-    from widget import Virtual_keyboard
+    from lemapi.constants import App
+    from lemapi.widget import Virtual_keyboard
 
     view = get_view()
 

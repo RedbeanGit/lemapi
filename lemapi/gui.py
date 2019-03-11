@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from constants import App, Path
-from util import read_json
+from lemapi.constants import App, Path
+from lemapi.util import read_json
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"

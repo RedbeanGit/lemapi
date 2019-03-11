@@ -6,7 +6,7 @@ Provides classes to manage delayed functions or asynchronous running.
 Created on 20/01/2019
 """
 
-from event_manager import Event
+from lemapi.event_manager import Event
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"

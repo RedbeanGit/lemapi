@@ -1,42 +1,23 @@
 # -*- coding: utf-8 -*-
 
-from api import get_listener_manager, get_task_manager, get_gui, get_audio_player
-from application import Application
-from audio import Mixer
-from constants import Path
-from event_manager import Event
-from launcher_widget import App_widget, Notif_widget
-from system_instance import Instance
-from task_manager import Analog_task_delay, Task_delay
-from util import getusername, exit, rotate_image
-from view import Desktop_view
-from widget import Virtual_keyboard
+from lemapi_desktop.view import Desktop_view
+from lemapi_desktop.widget import App_widget, Notif_widget
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
 
+from lemapi.activity import Activity
+from lemapi.api import get_audio_player, get_gui, get_listener_manager, get_task_manager
+from lemapi.application import Application
+from lemapi.audio import Mixer
+from lemapi.constants import Path
+from lemapi.event_manager import Event
+from lemapi.system_instance import Instance
+from lemapi.task_manager import Analog_task_delay, Task_delay
+from lemapi.util import getusername, exit
+
 from os.path import join
 from pygame.locals import K_LCTRL, K_ESCAPE
-
-
-class Activity(object):
-    def __init__(self, view):
-        self.view = view
-        self.events = []
-
-    def update(self, deltatime):
-        self.view.update()
-
-    def sleep(self):
-        for event in self.events:
-            event.enable = False
-
-    def wakeup(self):
-        for event in self.events:
-            event.enable = True
-
-    def destroy(self):
-        self.view.destroy()
 
 
 class Splash_activity(Activity):
@@ -47,7 +28,8 @@ class Splash_activity(Activity):
         tm = get_task_manager()
         tm.add_task("start_background_rotate", Task_delay(0.8, \
             self.start_background_rotate))
-        tm.add_task("start_appear_title", Task_delay(3.8, self.start_appear_title))
+        tm.add_task("start_appear_title", Task_delay(3.8, \
+            self.start_appear_title))
         tm.add_task("load_resources", Task_delay(8.5, self.load_resources))
 
         self.init_mixer()

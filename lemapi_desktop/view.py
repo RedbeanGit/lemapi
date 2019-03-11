@@ -1,59 +1,18 @@
-# -*- coding: utf -*-
+# -*- coding: utf-8 -*-
 
-from api import get_gui
-from constants import Path
-from launcher_widget import App_group, Clock_widget, Splash_labyrinth
-from util import read_json
-from widget import Image_widget, Text
-from launcher_widget import Toast_widget
+from lemapi_desktop.widget import App_group, Clock_widget, Splash_labyrinth, \
+    Toast_widget
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
 
 import os
-import collections
-import random
 
-
-class View(object):
-    def __init__(self):
-        self.widgets = collections.OrderedDict()
-        self.init_widgets()
-
-    def init_widgets(self):
-        pass
-
-    def add_widget(self, wname, wtype, pos, *wargs, **wkargs):
-        if wname in self.widgets:
-            self.widgets[wname].destroy()
-        gui = get_gui()
-        self.widgets[wname] = wtype(gui, pos, *wargs, **wkargs)
-
-    def add_toast(self, message, **kwargs):
-        name = "toast_%s_%s" % (message, random.random())
-        if "view_id" in kwargs:
-            kwargs.pop("view_id")
-            
-        self.widgets[name] = Toast_widget(get_gui(), (400, 400), message, \
-            view_id=name, **kwargs)
-
-    def remove_widget(self, wname):
-        if wname in self.widgets:
-            self.widgets[wname].destroy()
-            self.widgets.pop(wname)
-
-    def update(self):
-        for widget in tuple(self.widgets.values()):
-            widget.update()
-
-    def updateEvent(self, event):
-        for widget in tuple(self.widgets.values()):
-            widget.onEvent(event)
-
-    def destroy(self):
-        for widget in tuple(self.widgets.values()):
-            widget.destroy()
-        self.widgets.clear()
+from lemapi.api import get_gui
+from lemapi.constants import Path
+from lemapi.util import read_json
+from lemapi.view import View
+from lemapi.widget import Image_widget, Text
 
 
 class Splash_view(View):
