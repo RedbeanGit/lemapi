@@ -167,6 +167,8 @@ def close_keyboard():
 
 
 def get_save_path(app_id=None):
+    from lemapi.util import getusername
+
     if app_id == 0:
         name = "lemapi_desktop"
     elif app_id == None and Instance.app:
@@ -174,7 +176,7 @@ def get_save_path(app_id=None):
     elif app_id <= len(Application.apps) and app_id > 0:
         name = Application.apps[app_id - 1].get_name()
 
-    path = os.path.abspath(os.path.join("~", "saves", name))
+    path = os.path.join("/home", getusername(), "saves", name)
     if not os.path.exists(path):
-        os.mkdir(path)
+        os.makedirs(path)
     return path
