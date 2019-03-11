@@ -26,12 +26,12 @@ class View(object):
         self.widgets[wname] = wtype(gui, pos, *wargs, **wkargs)
 
     def add_toast(self, message, **kwargs):
-        name = "toast_%s_%s" % (message, random.random())
-        if "view_id" in kwargs:
-            kwargs.pop("view_id")
+        name = "toast"
+        if name in self.widgets:
+            self.widgets[name].destroy()
 
         self.widgets[name] = Toast_widget(get_gui(), (400, 400), message, \
-            view_id=name, **kwargs)
+            **kwargs)
 
     def remove_widget(self, wname):
         if wname in self.widgets:

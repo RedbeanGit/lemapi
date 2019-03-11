@@ -19,6 +19,7 @@ __version__ = "1.1.2"
 import collections
 import os
 import pygame.freetype
+import random
 
 from os.path import join
 from pygame.locals import MOUSEMOTION, MOUSEBUTTONDOWN, MOUSEBUTTONUP, KEYDOWN, \
@@ -1147,30 +1148,27 @@ class Switch_button(Button):
 
 class Toast_widget(Text):
 
-    DEFAULT_KWARGS = {
-        "duration": 5,
-        "anchor": (0, 0),
-        "view_id": "toast",
-        "textColor": (100, 100, 100, 255),
-    }
+	DEFAULT_KWARGS = {
+		"duration": 5,
+		"anchor": (0, 0),
+		"textColor": (100, 100, 100, 255)
+	}
 
-    def __init__(self, gui, pos, text, **kwargs):
-        Toast_widget.updateDefaultKwargs(kwargs)
-        super().__init__(gui, pos, text, **kwargs)
+	def __init__(self, gui, pos, text, **kwargs):
+		Toast_widget.updateDefaultKwargs(kwargs)
+		super().__init__(gui, pos, text, **kwargs)
 
-        self.fade_task = Analog_task_delay(self.kwargs["duration"], self.fade)
-        self.last_fade_value = 0
+		self.fade_task = Analog_task_delay(self.kwargs["duration"], self.fade)
+		self.last_fade_value = 0
+		self.id = random.random()
+		get_task_manager().add_task("fade_toast_%s" % self.id, self.fade_task)
 
-        get_task_manager().add_task("fade_toast_%s" % self.kwargs["view_id"], \
-            self.fade_task)
-
-    def fade(self, value):
-        r, g, b, a = self.kwargs["textColor"]
-        a = a - 255 * (value - self.last_fade_value)
-        self.last_fade_value = value
-        if a <= 0:
-            a = 0
-            get_view().remove_widget(self.kwargs["view_id"])
-            get_task_manager().remove_task("fade_toast_%s" % \
-                self.kwargs["view_id"])
-        self.config(textColor=(r, g, b, a))
+	def fade(self, value):
+		r, g, b, a = self.kwargs["textColor"]
+		a = a - 255 * (value - self.last_fade_value)
+		self.last_fade_value = value
+		if a <= 0:
+			a = 0
+			get_view().remove_widget("toast")
+			get_task_manager().remove_task("fade_toast_%s" % self.id)
+		self.config(textColor=(r, g, b, a))
