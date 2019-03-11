@@ -1,6 +1,7 @@
 # -*- coding: utf -*-
 
 from lemapi.api import get_gui
+from lemapi.widget import Toast_widget
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"

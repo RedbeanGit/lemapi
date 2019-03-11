@@ -7,9 +7,10 @@ These classes have been adpated from the Pyoro project.
 Created on 28/03/2018
 """
 
-from lemapi.api import request_keyboard, close_keyboard
+from lemapi.api import request_keyboard, close_keyboard, get_task_manager, get_view
 from lemapi.constants import Path
 from lemapi.event_manager import Event
+from lemapi.task_manager import Analog_task_delay
 from lemapi.util import resize_image, stretch_image, rotate_image
 
 __author__ = "Julien Dubois"
@@ -1142,3 +1143,34 @@ class Switch_button(Button):
 		or "desactivatedOnRightClickBackgroundImage" in kwargs \
 		or "desactivatedDisableBackgroundImage" in kwargs:
 			self.loadBackgroundImages()
+
+
+class Toast_widget(Text):
+
+    DEFAULT_KWARGS = {
+        "duration": 5,
+        "anchor": (0, 0),
+        "view_id": "toast",
+        "textColor": (100, 100, 100, 255),
+    }
+
+    def __init__(self, gui, pos, text, **kwargs):
+        Toast_widget.updateDefaultKwargs(kwargs)
+        super().__init__(gui, pos, text, **kwargs)
+
+        self.fade_task = Analog_task_delay(self.kwargs["duration"], self.fade)
+        self.last_fade_value = 0
+
+        get_task_manager().add_task("fade_toast_%s" % self.kwargs["view_id"], \
+            self.fade_task)
+
+    def fade(self, value):
+        r, g, b, a = self.kwargs["textColor"]
+        a = a - 255 * (value - self.last_fade_value)
+        self.last_fade_value = value
+        if a <= 0:
+            a = 0
+            get_view().remove_widget(self.kwargs["view_id"])
+            get_task_manager().remove_task("fade_toast_%s" % \
+                self.kwargs["view_id"])
+        self.config(textColor=(r, g, b, a))

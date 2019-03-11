@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from lemapi_desktop.widget import App_group, Clock_widget, Splash_labyrinth, \
-    Toast_widget
+from lemapi_desktop.widget import App_group, Clock_widget, Splash_labyrinth
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
