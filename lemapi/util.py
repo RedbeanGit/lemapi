@@ -28,7 +28,7 @@ from gi.repository import Gdk
 ################################################################################
 
 
-def getMonitorSize():
+def get_monitor_size():
 	"""
 	Return the screen size in mm.
 
@@ -42,7 +42,7 @@ def getMonitorSize():
 	return monitor.get_width_mm(), monitor.get_height_mm()
 
 
-def getScreenSize():
+def get_screen_size():
 	"""
 	Return the screen size in pixels.
 
@@ -55,7 +55,7 @@ def getScreenSize():
 	return screen.get_width(), screen.get_height()
 
 
-def getScreenRatio():
+def get_screen_ratio():
 	"""
 	Return the screen resolution (width / height).
 
@@ -63,7 +63,7 @@ def getScreenRatio():
 	:returns: A floating point value representing the ratio width / height.
 	"""
 
-	w, h = getScreenSize()
+	w, h = get_screen_size()
 	if h:
 		return w / h
 	print("[lemapi] [WARNING] [util.getScreenRatio] Height can't be 0")
@@ -71,8 +71,8 @@ def getScreenRatio():
 
 
 def get_monitor_density():
-	wm, hm = getMonitorSize()
-	wp, hp = getScreenSize()
+	wm, hm = get_monitor_size()
+	wp, hp = get_screen_size()
 	return wp / wm, hp / hm
 
 ################################################################################
@@ -183,8 +183,10 @@ def stretch_image(image, newSize, borderSize):
 		borderSize, newSideLength[1] + borderSize))
 	return back
 
+
 def rotate_image(image, angle):
 	return pygame.transform.rotate(image, angle)
+
 
 ################################################################################
 ### File operations ############################################################
@@ -221,6 +223,7 @@ def read_json(path):
 
 def write_json(path, content):
 	write_file(path, json.dumps(content, indent="\t"))
+
 
 ################################################################################
 ### Introspection ##############################################################
@@ -281,6 +284,7 @@ def exit(errorLevel = 0):
 	stop_audio_player()
 	print("[lemapi] [INFO] [exit] LemAPI stopped successfully!")
 	sys.exit(errorLevel)
+
 
 def getusername():
 	return getpass.getuser()

@@ -31,6 +31,7 @@ class Player(object):
 		self.lock = threading.RLock()
 		self.active = False
 		self.speed = 1
+		self.volume = 1
 
 		self.stream = self.pa.open(
 				format = self.pa.get_format_from_width(
@@ -114,9 +115,14 @@ class Player(object):
 			self.framerate, \
 			int(self.framerate / self.speed),
 			None)[0]
+		self.buffer = audioop.mul(self.buffer, self.sample_width, self.volume)
 
 		self.stream.write(self.buffer)
 		self.buffer = bytes(self.get_chunk_size())
+
+	def set_volume(self, volume):
+		if volume >= 0 and volume <= 1:
+			self.volume = volume
 
 
 class Mixer(object):

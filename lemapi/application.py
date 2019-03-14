@@ -102,8 +102,11 @@ class Application(object):
 	@staticmethod
 	def get_local_apps():
 		path = Path.GAMES.format(user=getusername())
+
 		if not os.path.exists(path):
 			os.makedirs(path)
+
 		games = os.listdir(path)
 		return [os.path.join(path, g) for g in games if "manifest.json" in \
-			os.listdir(os.path.join(path, g))]
+			os.listdir(os.path.join(path, g)) and g not in ("lemapi", \
+			"lemapi_desktop")]

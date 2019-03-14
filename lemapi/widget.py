@@ -1169,6 +1169,6 @@ class Toast_widget(Text):
 		self.last_fade_value = value
 		if a <= 0:
 			a = 0
-			get_view().remove_widget("toast")
+			get_view().remove_toast()
 			get_task_manager().remove_task("fade_toast_%s" % self.id)
 		self.config(textColor=(r, g, b, a))

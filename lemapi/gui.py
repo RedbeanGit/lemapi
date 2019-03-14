@@ -22,13 +22,6 @@ class GUI(object):
         self.root_surface = pygame.display.set_mode(App.SCREEN_SIZE)#, pygame.FULLSCREEN)
         pygame.display.set_caption(App.NAME)
 
-    def load_images(self):
-        print("[lemapi] [INFO] [GUI.load_images] Loading system images")
-        images = read_json(os.path.join(Path.IMAGES, "resources.json"))
-        if images:
-            for image in images:
-                self.load_image(os.path.join(Path.IMAGES, *image))
-
     def load_image(self, path):
         if os.path.exists(path):
             try:

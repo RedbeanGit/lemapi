@@ -20,5 +20,9 @@
   ["gui", "switch button", "switch_desactivated_hover.png"],
   ["gui", "switch button", "switch_desactivated_middle_click.png"],
   ["gui", "switch button", "switch_desactivated_right_click.png"],
-  ["gui", "switch button", "switch_desactivated.png"]
+  ["gui", "switch button", "switch_desactivated.png"],
+  ["splash", "labyrinth_part_1.png"],
+  ["splash", "labyrinth_part_2.png"],
+  ["splash", "labyrinth_part_3.png"],
+  ["splash", "lem_logo.png"]
 ]

@@ -11,6 +11,14 @@ class App(object):
     NAME = "Lem Launcher"
     GPIO_ENABLE = False
     SCREEN_SIZE = (800, 480)
+    SPLASH_ANIMATION = True
+    DEFAULT_SETTINGS = {
+        "sound_volume": 1,
+        "theme": "white",
+        "username": "LemAPI user",
+        "custom_date": (0, 0, 0),
+        "custom_time": (0, 0)
+    }
 
 
 class Path(object):
@@ -19,8 +27,10 @@ class Path(object):
     IMAGES = join(DATA, "images")
     GUI = join(IMAGES, "gui")
     AUDIO = join(DATA, "audio")
-    MUSIC = join(AUDIO, "music")
+    MUSICS = join(AUDIO, "music")
+    SOUNDS = join(AUDIO, "sounds")
     GAMES = join("/", "home", "{user}", "games")
+    SAVES = join("/", "home", "{user}", "saves")
 
 
 class GPIO(object):
