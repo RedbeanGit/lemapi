@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from lemapi_desktop.util import load_images, load_sounds, load_musics
+from lemapi_desktop.util import load_images, load_sounds, load_musics, \
+    load_settings, exit
 from lemapi_desktop.view import Desktop_view
 from lemapi_desktop.widget import App_widget, Notif_widget
 
@@ -18,7 +19,7 @@ from lemapi.constants import Path, App
 from lemapi.event_manager import Event
 from lemapi.system_instance import Instance
 from lemapi.task_manager import Analog_task_delay, Task_delay
-from lemapi.util import getusername, exit, read_json
+from lemapi.util import getusername, read_json
 
 from os.path import join
 from pygame.locals import K_LCTRL, K_ESCAPE
@@ -43,6 +44,7 @@ class Splash_activity(Activity):
             self.appear_title(1)
             self.appear_loading(1)
 
+        load_settings()
         self.init_mixer()
         threading.Thread(target=self.load_resources).start()
 

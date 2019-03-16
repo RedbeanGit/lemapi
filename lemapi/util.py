@@ -218,11 +218,11 @@ def read_json(path):
 	content = read_file(path)
 	if content != None:
 		return json.loads(content)
-	return content
+	return False
 
 
 def write_json(path, content):
-	write_file(path, json.dumps(content, indent="\t"))
+	return write_file(path, json.dumps(content, indent="\t"))
 
 
 ################################################################################

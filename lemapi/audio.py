@@ -6,6 +6,8 @@ Provides some audio classes like Sound, Music, Player and Mixer.
 Created on 21/01/2019
 """
 
+from lemapi.system_instance import Instance
+
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
 
@@ -31,7 +33,6 @@ class Player(object):
 		self.lock = threading.RLock()
 		self.active = False
 		self.speed = 1
-		self.volume = 1
 
 		self.stream = self.pa.open(
 				format = self.pa.get_format_from_width(
@@ -115,14 +116,11 @@ class Player(object):
 			self.framerate, \
 			int(self.framerate / self.speed),
 			None)[0]
-		self.buffer = audioop.mul(self.buffer, self.sample_width, self.volume)
+		self.buffer = audioop.mul(self.buffer, self.sample_width, \
+			Instance.settings.get("sound_volume", 1))
 
 		self.stream.write(self.buffer)
 		self.buffer = bytes(self.get_chunk_size())
-
-	def set_volume(self, volume):
-		if volume >= 0 and volume <= 1:
-			self.volume = volume
 
 
 class Mixer(object):

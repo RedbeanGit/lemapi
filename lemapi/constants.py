@@ -8,7 +8,7 @@ from os.path import join, dirname, abspath
 
 
 class App(object):
-    NAME = "Lem Launcher"
+    NAME = "LemAPI"
     GPIO_ENABLE = False
     SCREEN_SIZE = (800, 480)
     SPLASH_ANIMATION = True

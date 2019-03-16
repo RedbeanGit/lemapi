@@ -128,6 +128,11 @@ class Control_manager(object):
             event = event.get_copy()
         self.lm.add_listener(event, JOYAXISMOTION)
 
+    def add_joy_dead_event(self, event, copy=True):
+        if copy:
+            event = event.get_copy()
+        self.lm.add_listener(event, (JOYAXISMOTION, KEYUP))
+
     # Direction changes
     def add_joy_right_event(self, event, copy=True):
         if copy:
@@ -194,6 +199,13 @@ class Control_manager(object):
                 elif type == (JOYAXISMOTION, K_DOWN):
                     if abs(x) < abs(y):
                         if y <= -dz and old_y > -dz:
+                            event.call()
+                elif type == (JOYAXISMOTION, KEYUP):
+                    if x < dz and x > -dz and (old_x >= dz or old_x <= -dz):
+                        if y < dz and y > -dz:
+                            event.call()
+                    elif y < dz and y > -dz and (old_y >= dz or old_y <= dz):
+                        if x < dz and x > -dz:
                             event.call()
 
             for name in ("joy_x", "joy_y"):
