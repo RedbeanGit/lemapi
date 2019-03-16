@@ -116,4 +116,5 @@ def define_working_directory():
 
 
 if __name__ == "__main__":
+    print("[lemapi] [INFO] Starting LemAPI...")
     main()

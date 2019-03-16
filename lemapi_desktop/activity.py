@@ -10,7 +10,7 @@ __version__ = "0.1.0"
 import threading
 
 from lemapi.activity import Activity
-from lemapi.api import get_audio_player, get_gui, get_listener_manager, \
+from lemapi.api import get_audio_player, get_gui, get_global_listener_manager, \
     get_task_manager, get_save_path
 from lemapi.application import Application
 from lemapi.audio import Mixer
@@ -30,6 +30,7 @@ class Splash_activity(Activity):
         self.mixer = None
         self.loaded = False
 
+        self.init_events()
         self.load_splash_images()
         tm = get_task_manager()
 
@@ -45,8 +46,10 @@ class Splash_activity(Activity):
         self.init_mixer()
         threading.Thread(target=self.load_resources).start()
 
-        print("[lemapi] [INFO] [Splash_activity.__init__] Activity started " \
-            + "successfully !")
+    def init_events(self):
+        lmgr = get_global_listener_manager()
+        event = Event(exit)
+        lmgr.km.add_key_down_event(event, K_LCTRL, K_ESCAPE)
 
     def load_splash_images(self):
         names = ("labyrinth_part_1.png", "labyrinth_part_2.png", \
@@ -96,6 +99,7 @@ class Splash_activity(Activity):
         self.destroy()
         view = Desktop_view()
         Instance.activities[0] = Desktop_activity(view)
+        view.init_events()
 
     def destroy(self):
         tm = get_task_manager()
@@ -110,14 +114,8 @@ class Desktop_activity(Activity):
         self.apps = []
         self.load_apps()
         self.load_icons()
-        self.initEvents()
         print("[lemapi] [INFO] [Desktop_activity.__init__] Activity started " \
             + "successfully !")
-
-    def initEvents(self):
-        lmgr = get_listener_manager()
-        event = Event(exit)
-        lmgr.km.add_key_down_event(event, K_LCTRL, K_ESCAPE)
 
     def load_apps(self):
         apps = Application.get_local_apps()
@@ -133,17 +131,8 @@ class Desktop_activity(Activity):
 
             self.view.add_widget(wname, App_widget, (0, 0), \
                 app, anchor=(0, 0))
-
-            event = Event(self.run_app, app)
-            self.view.widgets[wname].endClickEvents.append(event)
             self.view.add_app(wname)
-
-    def run_app(self, app):
-        print("[lemapi] [INFO] [Desktop_activity.run_app] Running app " \
-            + "'%s' from lemapi desktop" % app.get_name())
-        Instance.app = app
-        app.load()
-        app.run()
+        self.view.reset_angle()
 
     def add_notif(self, title, msg):
         self.view.add_widget("notif", Notif_widget, (0, 0), title, msg)

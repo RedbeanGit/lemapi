@@ -10,12 +10,13 @@ __version__ = "0.1.0"
 import gpiozero
 import pygame
 from pygame.locals import QUIT, KEYDOWN, KEYUP, JOYBUTTONDOWN, JOYBUTTONUP, \
-    JOYAXISMOTION
+    JOYAXISMOTION, K_RIGHT, K_LEFT, K_UP, K_DOWN
 
 
 class Listener_manager(object):
     def __init__(self):
         self.listeners = []
+        self.enable = True
         self.km = Keyboard_manager(self)
         self.cm = Control_manager(self)
 
@@ -29,9 +30,12 @@ class Listener_manager(object):
         for event in pygame.event.get():
             if event.type == QUIT:
                 exit()
-            get_view().updateEvent(event)
-        self.km.update()
-        self.cm.update()
+            if self.enable:
+                get_view().updateEvent(event)
+
+        if self.enable:
+            self.km.update()
+            self.cm.update()
 
 
 class Keyboard_manager(object):
@@ -124,18 +128,42 @@ class Control_manager(object):
             event = event.get_copy()
         self.lm.add_listener(event, JOYAXISMOTION)
 
+    # Direction changes
+    def add_joy_right_event(self, event, copy=True):
+        if copy:
+            event = event.get_copy()
+        self.lm.add_listener(event, (JOYAXISMOTION, K_RIGHT))
+
+    def add_joy_left_event(self, event, copy=True):
+        if copy:
+            event = event.get_copy()
+        self.lm.add_listener(event, (JOYAXISMOTION, K_LEFT))
+
+    def add_joy_up_event(self, event, copy=True):
+        if copy:
+            event = event.get_copy()
+        self.lm.add_listener(event, (JOYAXISMOTION, K_UP))
+
+    def add_joy_down_event(self, event, copy=True):
+        if copy:
+            event = event.get_copy()
+        self.lm.add_listener(event, (JOYAXISMOTION, K_DOWN))
+
     def update(self):
         if App.GPIO_ENABLE:
             pressed = self.get_pressed_buttons()
+
+            x = -self.joystick["joy_x"].value * 2 - 1
+            y = -self.joystick["joy_y"].value * 2 - 1
+            old_x = self.current_states["joy_x"]
+            old_y = self.current_states["joy_y"]
+            dz = App.settings.get("control_joystick_deadzone", 0.1)
+
             for event, type, values in self.lm.listeners:
 
                 if type == JOYAXISMOTION:
-                    x = self.joystick["joy_x"].value * 2 - 1
-                    y = self.joystick["joy_y"].value * 2 - 1
-                    if x != self.current_states["joy_x"] \
-                        or y != self.current_states["joy_y"]:
-                        event.call(x, y, self.current_states["joy_x"], \
-                            self.current_states["joy_y"])
+                    if x != old_x or y != old_y:
+                        event.call(x, y, old_x, old_y)
 
                 elif type == JOYBUTTONDOWN:
                     if Control_manager.has_all_button_pressed(pressed, values):
@@ -151,8 +179,25 @@ class Control_manager(object):
                     else:
                         event.obsolete = False
 
+                elif type == (JOYAXISMOTION, K_RIGHT):
+                    if abs(x) >= abs(y):
+                        if x >= dz and old_x < dz:
+                            event.call()
+                elif type == (JOYAXISMOTION, K_LEFT):
+                    if abs(x) >= abs(y):
+                        if x <= -dz and old_x > -dz:
+                            event.call()
+                elif type == (JOYAXISMOTION, K_UP):
+                    if abs(x) < abs(y):
+                        if y >= dz and old_y < dz:
+                            event.call()
+                elif type == (JOYAXISMOTION, K_DOWN):
+                    if abs(x) < abs(y):
+                        if y <= -dz and old_y > -dz:
+                            event.call()
+
             for name in ("joy_x", "joy_y"):
-                self.current_states[name] = self.joystick[name].value * 2 - 1
+                self.current_states[name] = -self.joystick[name].value * 2 - 1
 
     def get_pressed_buttons(self):
         return [name for name, button in self.buttons.items() if \

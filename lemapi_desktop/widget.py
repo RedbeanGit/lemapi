@@ -7,12 +7,11 @@ import datetime
 import math
 import time
 
-from lemapi.api import get_task_manager, get_view
+from lemapi.api import get_task_manager, get_view, get_listener_manager
 from lemapi.constants import Path
-from lemapi.widget import Menu_widget, Text, Widget, Eventable_widget, \
-    Image_widget
 from lemapi.task_manager import Analog_task_delay
 from lemapi.util import rotate_image, resize_image
+from lemapi.widget import Menu_widget, Text, Widget, Eventable_widget, Image_widget
 
 from os.path import join
 
@@ -110,7 +109,6 @@ class App_group(Eventable_widget):
         App_group.updateDefaultKwargs(kwargs)
         self.app_widgets = []
         self.background = None
-        self.visible_app_index = 0
         self.angle = 1
         self.last_mouse_pos = []
 
@@ -120,6 +118,49 @@ class App_group(Eventable_widget):
     def load_background(self):
         self.background = resize_image(self.gui.get_image( \
             self.kwargs["backgroundImage"]), self.kwargs["size"])
+
+    def get_delta_angle(self):
+        return 0.5 / self.kwargs["nbAppVisible"]
+
+    def get_current_app_widget(self):
+        index = round((1 - self.angle) / self.get_delta_angle())
+        return self.app_widgets[index]
+
+    def reset_angle(self):
+        app_index = math.ceil(len(self.app_widgets) / 2)
+        self.angle = app_index * self.get_delta_angle() + 1/2
+        print("[lemapi] [INFO] [App_group.reset_angle] Angle defined to %s radians" % \
+            self.angle)
+
+    def next_app(self):
+        delta_angle = self.get_delta_angle()
+
+        if self.angle > 1:
+            self.angle = 1
+        elif self.angle < 1 - (len(self.app_widgets) - 1) * delta_angle:
+            self.angle = 1 - (len(self.app_widgets) - 1) * delta_angle
+
+        app_index = math.ceil((1 - self.angle) / delta_angle)
+        old_angle, self.angle = self.angle, 1 - delta_angle * app_index
+
+        if old_angle == self.angle:
+            if app_index < len(self.app_widgets) - 1:
+                self.angle -= delta_angle
+
+    def previous_app(self):
+        delta_angle = self.get_delta_angle()
+
+        if self.angle > 1:
+            self.angle = 1
+        elif self.angle < 1 - (len(self.app_widgets) - 1) * delta_angle:
+            self.angle = 1 - (len(self.app_widgets) - 1) * delta_angle
+
+        app_index = math.floor((1 - self.angle) / delta_angle)
+        old_angle, self.angle = self.angle, 1 - delta_angle * app_index
+
+        if old_angle == self.angle:
+            if app_index > 0:
+                self.angle += delta_angle
 
     def add_app_widget(self, app_widget):
         if isinstance(app_widget, App_widget):
@@ -131,34 +172,51 @@ class App_group(Eventable_widget):
 
     def update(self):
         if self.background:
-            x, y = self.getRealPos()
-            w, h = self.kwargs["size"]
-            surface = rotate_image(self.background, self.angle * 180)
-            sw, sh = surface.get_size()
-            x -= (sw - w) / 2
-            y -= (sh - h) / 2
-            self.gui.draw_image(surface, (x, y))
+            self.update_background()
+        self.update_app_widgets()
+        super().update()
 
-        angle_app = 1 / 2 / self.kwargs["nbAppVisible"]
+    def update_app_widgets(self):
+        delta_angle = self.get_delta_angle()
         radius = min(self.kwargs["size"]) / 2
-        visible_apps = self.app_widgets[self.visible_app_index : \
-            self.visible_app_index + self.kwargs["nbAppVisible"]]
-        sx, sy = self.pos
+        sx, sy = self.getRealPos()
+        w, h = self.kwargs["size"]
+        sx, sy = sx + w / 2, sy + h / 2
 
-        for index, app_widget in enumerate(visible_apps):
-            x = math.cos((self.angle + index * angle_app) * math.pi) * radius
-            y = -math.sin((self.angle + index * angle_app) * math.pi) * radius
-            app_widget.setPos((x + sx, y + sy))
+        for index, app_widget in enumerate(self.app_widgets):
+            x = math.cos((self.angle + index * delta_angle) * math.pi) * radius
+            y = math.sin((self.angle + index * delta_angle) * math.pi) * radius
+            app_widget.setPos((sx + x, sy + y))
+
+    def update_background(self):
+        x, y = self.getRealPos()
+        w, h = self.kwargs["size"]
+        surface = rotate_image(self.background, -self.angle * 180)
+
+        sw, sh = surface.get_size()
+        x -= (sw - w) / 2
+        y -= (sh - h) / 2
+        self.gui.draw_image(surface, (x, y))
 
     def update_angle(self):
         if self.clicked and self.last_mouse_pos:
             try:
-                self.angle += math.asin((self.lastEvent.pos[1] - \
-                    self.last_mouse_pos[1]) / abs(self.lastEvent.pos[0] - \
-                    self.pos[0]) / math.pi)
+                x, y = self.getRealPos()
+                dy = self.lastEvent.pos[1] - self.last_mouse_pos[1]
+                dx = self.lastEvent.pos[0] - x + self.kwargs["size"][0] / 2
+                self.angle -= math.asin(dy / dx / math.pi)
+
+                delta_angle = self.get_delta_angle()
+                min_angle = 1 - (len(self.app_widgets) - 1) * delta_angle
+                max_angle = 1
+
+                if self.angle > max_angle:
+                    self.angle = max_angle
+                elif self.angle < min_angle:
+                    self.angle = min_angle
             except ValueError:
                 print("[lemapi] [WARNING] [App_group.update_angle] Bad position" \
-                    + " (domain error)")
+                    + " (math domain error)")
             self.last_mouse_pos = list(self.lastEvent.pos)
 
     def onHover(self):
@@ -176,6 +234,11 @@ class App_group(Eventable_widget):
     def onEndClick(self):
         self.last_mouse_pos = []
         super().onEndClick()
+
+    def click_app(self):
+        app = self.get_current_app_widget()
+        app.onClick()
+        app.onEndClick()
 
 
 class Clock_widget(Text):

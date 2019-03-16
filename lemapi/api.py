@@ -5,6 +5,7 @@ from lemapi.system_instance import Instance
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
 
+import copy
 import os
 import sys
 import traceback
@@ -58,6 +59,10 @@ def get_gui():
 
 
 def get_listener_manager():
+    return Instance.activities[-1].listener_manager
+
+
+def get_global_listener_manager():
     from lemapi.event_manager import Listener_manager
 
     if not Instance.listener_manager:
@@ -97,6 +102,17 @@ def restart_app():
         Instance.app.run()
     else:
         print("[lemapi] [WARNING] [restart_app] No app currently running!")
+
+
+def start_app(app):
+    if Instance.app:
+        print("[lemapi] [INFO] [run_app] Stopping app '%s'" % Instance.app.get_name())
+        Instance.app.exit()
+
+    print("[lemapi] [INFO] [run_app] Running app '%s'" % app.get_name())
+    Instance.app = app
+    app.load()
+    app.run()
 
 
 def stop_app():
@@ -180,3 +196,15 @@ def get_save_path(app_id=None):
     if not os.path.exists(path):
         os.makedirs(path)
     return path
+
+
+def get_default_settings():
+    from lemapi.constants import App
+
+    return copy.deepcopy(App.DEFAULT_SETTINGS)
+
+
+def get_settings():
+    if Instance.settings:
+        return Instance.settings
+    return get_default_settings()
