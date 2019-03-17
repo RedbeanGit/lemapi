@@ -19,8 +19,6 @@ from os.path import join
 class App_widget(Menu_widget, Eventable_widget):
 
     DEFAULT_KWARGS = {
-        "backgroundImage": join(Path.GUI, "app_frame.png"),
-        "backgroundBorderSize": 30,
         "size": (300, 80)
     }
 
@@ -94,7 +92,6 @@ class Splash_labyrinth(Widget):
                 self.gui.draw_image(surface, (x, y))
             self.last_time = time.time()
         super().update()
-
 
 
 class App_group(Eventable_widget):
@@ -259,5 +256,18 @@ class Clock_widget(Text):
         super().update()
 
 
-class Notif_widget(Menu_widget):
-    pass
+class App_descriptor(Menu_widget):
+
+    DEFAULT_KWARGS = {
+        "size": (150, 150)
+    }
+
+    def __init__(self, gui, pos, app, **kwargs):
+        App_descriptor.updateDefaultKwargs(kwargs)
+        super().__init__(gui, pos, **kwargs)
+
+        self.app = app
+
+    def initWidgets(self):
+        w, h = self.kwargs["size"]
+        self.addSubWidget("title_text", Text, ())

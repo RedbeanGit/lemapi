@@ -3,7 +3,7 @@
 from lemapi_desktop.util import load_images, load_sounds, load_musics, \
     load_settings, exit
 from lemapi_desktop.view import Desktop_view
-from lemapi_desktop.widget import App_widget, Notif_widget
+from lemapi_desktop.widget import App_widget
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
@@ -135,6 +135,3 @@ class Desktop_activity(Activity):
                 app, anchor=(0, 0))
             self.view.add_app(wname)
         self.view.reset_angle()
-
-    def add_notif(self, title, msg):
-        self.view.add_widget("notif", Notif_widget, (0, 0), title, msg)

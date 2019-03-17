@@ -1,6 +1,5 @@
 [
   ["background", "white_degrade.jpg"],
-  ["gui", "app_frame.png"],
   ["gui", "button", "button_click.png"],
   ["gui", "button", "button_disable.png"],
   ["gui", "button", "button_hover.png"],

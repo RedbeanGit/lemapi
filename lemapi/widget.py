@@ -628,7 +628,7 @@ class Menu_widget(Widget):
 
 	DEFAULT_KWARGS = {
 		"backgroundImage": join(Path.GUI, "frame.png"),
-		"backgroundBorderSize": 0
+		"backgroundBorderSize": 16
 	}
 
 	def __init__(self, gui, pos, **kwargs):
