@@ -14,18 +14,18 @@ class App(object):
     SPLASH_ANIMATION = True
     DEFAULT_SETTINGS = {
         "sound_volume": 1,
-        "theme": "white",
+        "theme_color": "white",
         "username": "LemAPI user",
         "custom_date": (0, 0, 0),
         "custom_time": (0, 0)
     }
+    THEME_COLORS = ("white", "blue", "green", "red", "magenta", "orange", "cyan", "yellow")
 
 
 class Path(object):
     ROOT = dirname(abspath(sys.argv[0]))
     DATA = join(ROOT, "data")
     IMAGES = join(DATA, "images")
-    GUI = join(IMAGES, "gui")
     AUDIO = join(DATA, "audio")
     MUSICS = join(AUDIO, "music")
     SOUNDS = join(AUDIO, "sounds")

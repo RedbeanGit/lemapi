@@ -5,7 +5,7 @@ from lemapi_desktop.widget import App_group, Clock_widget, Splash_labyrinth
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
 
-from lemapi.api import get_gui, get_listener_manager, start_app
+from lemapi.api import get_gui, get_listener_manager, start_app, get_theme_color
 from lemapi.constants import Path
 from lemapi.event_manager import Event
 from lemapi.util import read_json
@@ -42,7 +42,7 @@ class Splash_view(View):
 class Desktop_view(View):
     def init_widgets(self):
         w, h = get_gui().get_size()
-        bg_path = join(Path.IMAGES, "background", "white_degrade.jpg")
+        bg_path = join(Path.IMAGES, "background", get_theme_color() + ".png")
 
         self.add_widget("background_image", Image_widget, (w // 2, h // 2), \
             bg_path, size=(w, h), anchor=(0, 0))

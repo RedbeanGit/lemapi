@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from lemapi.constants import App, Path
 from lemapi.system_instance import Instance
 
 __author__ = "Julien Dubois"
@@ -138,7 +139,6 @@ def get_app_id():
 
 def get_app_path(app_id=None):
     from lemapi.application import Application
-    from lemapi.constants import Path
 
     if app_id == 0:
         return Path.ROOT
@@ -157,7 +157,6 @@ def force_view_update():
 
 
 def request_keyboard():
-    from lemapi.constants import App
     from lemapi.widget import Virtual_keyboard
 
     view = get_view()
@@ -170,7 +169,6 @@ def request_keyboard():
 
 
 def close_keyboard():
-    from lemapi.constants import App
     from lemapi.widget import Virtual_keyboard
 
     view = get_view()
@@ -199,8 +197,6 @@ def get_save_path(app_id=None):
 
 
 def get_default_settings():
-    from lemapi.constants import App
-
     return copy.deepcopy(App.DEFAULT_SETTINGS)
 
 
@@ -208,3 +204,11 @@ def get_settings():
     if Instance.settings:
         return Instance.settings
     return get_default_settings()
+
+
+def get_theme_color():
+    color = Instance.settings.get("theme_color", "white")
+
+    if color in App.THEME_COLORS:
+        return color
+    return "white"

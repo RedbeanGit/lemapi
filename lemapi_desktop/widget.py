@@ -99,7 +99,7 @@ class App_group(Eventable_widget):
     DEFAULT_KWARGS = {
         "size": (600, 600),
         "nbAppVisible": 3,
-        "backgroundImage": join(Path.GUI, "labyrinth.png")
+        "backgroundImage": join(Path.IMAGES, "labyrinth", "{theme_color}.png")
     }
 
     def __init__(self, gui, pos, **kwargs):
@@ -243,7 +243,7 @@ class Clock_widget(Text):
     DEFAULT_KWARGS = {
         "fontSize": 70,
         "bold": True,
-        "textColor": (100, 100, 100, 110)
+        "textColor": (100, 100, 100, 255)
     }
 
     def __init__(self, gui, pos, **kwargs):

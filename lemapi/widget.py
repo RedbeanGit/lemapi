@@ -20,6 +20,7 @@ import collections
 import os
 import pygame.freetype
 import random
+import time
 
 from os.path import join
 from pygame.locals import MOUSEMOTION, MOUSEBUTTONDOWN, MOUSEBUTTONUP, KEYDOWN, \
@@ -88,7 +89,7 @@ class Text(Widget):
 
 	DEFAULT_KWARGS = {
 		"fontSize": 20,
-		"font": join(Path.GUI, "font.ttf"),
+		"font": join(Path.IMAGES, "font.ttf"),
 
 		"bold": False,
 		"wide": False,
@@ -236,7 +237,7 @@ class Eventable_widget(Widget):
 
 	def onRightClick(self):
 		self.rightClicked = True
-		for event in self.rightEvents:
+		for event in self.rightClickEvents:
 			event.call()
 
 	def onMouseWheel(self, direction):
@@ -296,6 +297,7 @@ class Button(Eventable_widget):
 	"""
 	A simple button widget.
 	"""
+	images_path = join(Path.IMAGES, "button", "{theme_color}")
 
 	DEFAULT_KWARGS = {
 		"text": "",
@@ -303,17 +305,13 @@ class Button(Eventable_widget):
 			"anchor": (0, 0)
 		},
 		"textAnchor": (0, 0),
-		"backgroundImage": join(Path.GUI, "button", "button.png"),
-		"onHoverBackgroundImage": join(Path.GUI, "button", \
-			"button_hover.png"),
-		"onClickBackgroundImage": join(Path.GUI, "button", \
-			"button_click.png"),
-		"onMiddleClickBackgroundImage": join(Path.GUI, "button", \
-			"button_middle_click.png"),
-		"onRightClickBackgroundImage": join(Path.GUI, "button", \
-			"button_right_click.png"),
-		"disableBackgroundImage": join(Path.GUI, "button", \
-			"button_disable.png")
+		"backgroundImage": join(images_path, "normal.png"),
+		"onHoverBackgroundImage": join(images_path, "hover.png"),
+		"onClickBackgroundImage": join(images_path, "click.png"),
+		"onMiddleClickBackgroundImage": join(images_path, "middle_click.png"),
+		"onRightClickBackgroundImage": join(images_path, "right_click.png"),
+		"disableBackgroundImage": join(images_path, "disable.png"),
+		"borderSize": 16
 	}
 
 	def __init__(self, gui, pos, **kwargs):
@@ -361,9 +359,14 @@ class Button(Eventable_widget):
 				backgroundName = eventName + "BackgroundImage"
 			else:
 				backgroundName = "backgroundImage"
-			self.backgroundImages[eventName] = resize_image(
-				self.gui.get_image(self.kwargs[backgroundName]), \
-				self.kwargs["size"])
+			if self.kwargs["borderSize"]:
+				self.backgroundImages[eventName] = stretch_image(
+					self.gui.get_image(self.kwargs[backgroundName]), \
+					self.kwargs["size"], self.kwargs["borderSize"])
+			else:
+				self.backgroundImages[eventName] = resize_image(
+					self.gui.get_image(self.kwargs[backgroundName]), \
+					self.kwargs["size"])
 
 	def update(self):
 		"""
@@ -627,7 +630,7 @@ class Image_widget(Widget):
 class Menu_widget(Widget):
 
 	DEFAULT_KWARGS = {
-		"backgroundImage": join(Path.GUI, "frame.png"),
+		"backgroundImage": join(Path.IMAGES, "frame", "{theme_color}.png"),
 		"backgroundBorderSize": 16
 	}
 
@@ -730,7 +733,7 @@ class Virtual_keyboard(Menu_widget):
 	DEFAULT_KWARGS = {
 		"size": (800, 150),
 		"buttonMargin": 5,
-		"backgroundImage": join(Path.GUI, "keyboard_background.png")
+		"backgroundImage": join(Path.IMAGES, "keyboard", "{theme_color}.png")
 	}
 
 	def __init__(self, gui, pos, **kwargs):
@@ -896,6 +899,8 @@ class Virtual_keyboard(Menu_widget):
 
 class Setting_bar(Eventable_widget):
 
+	images_path = join(Path.IMAGES, "setting bar", "{theme_color}")
+
 	DEFAULT_KWARGS = {
 		"lineThickness": 16,
 		"cursorWidth": 16,
@@ -905,19 +910,19 @@ class Setting_bar(Eventable_widget):
 
 		"value": 0,
 
-		"lineImage": join(Path.GUI, "setting bar", "line.png"),
-		"onHoverLineImage": join(Path.GUI, "setting bar", "line_hover.png"),
-		"onClickLineImage": join(Path.GUI, "setting bar", "line_click.png"),
-		"onMiddleClickLineImage": join(Path.GUI, "setting bar", "line_middle_click.png"),
-		"onRightClickLineImage": join(Path.GUI, "setting bar", "line_right_click.png"),
-		"disableLineImage": join(Path.GUI, "setting bar", "line_disable.png"),
+		"lineImage": join(images_path, "line.png"),
+		"onHoverLineImage": join(images_path, "line_hover.png"),
+		"onClickLineImage": join(images_path, "line_click.png"),
+		"onMiddleClickLineImage": join(images_path, "line_middle_click.png"),
+		"onRightClickLineImage": join(images_path, "line_right_click.png"),
+		"disableLineImage": join(images_path, "line_disable.png"),
 
-		"cursorImage": join(Path.GUI, "setting bar", "cursor.png"),
-		"onHoverCursorImage": join(Path.GUI, "setting bar", "cursor_hover.png"),
-		"onClickCursorImage": join(Path.GUI, "setting bar", "cursor_click.png"),
-		"onMiddleClickCursorImage": join(Path.GUI, "setting bar", "cursor_middle_click.png"),
-		"onRightClickCursorImage": join(Path.GUI, "setting bar", "cursor_right_click.png"),
-		"disableCursorImage": join(Path.GUI, "setting bar", "cursor_disable.png")
+		"cursorImage": join(images_path, "cursor.png"),
+		"onHoverCursorImage": join(images_path, "cursor_hover.png"),
+		"onClickCursorImage": join(images_path, "cursor_click.png"),
+		"onMiddleClickCursorImage": join(images_path, "cursor_middle_click.png"),
+		"onRightClickCursorImage": join(images_path, "cursor_right_click.png"),
+		"disableCursorImage": join(images_path, "cursor_disable.png")
 	}
 
 	def __init__(self, gui, pos, **kwargs):
@@ -1067,21 +1072,21 @@ class Setting_bar(Eventable_widget):
 
 class Switch_button(Button):
 
-	fpath = join(Path.GUI, "switch button")
+	images_path = join(Path.IMAGES, "switch button", "{theme_color}")
 	DEFAULT_KWARGS = {
-		"backgroundImage": join(fpath, "switch_activated.png"),
-		"onHoverBackgroundImage": join(fpath, "switch_activated_hover.png"),
-		"onClickBackgroundImage": join(fpath, "switch_activated_click.png"),
-		"onMiddleClickBackgroundImage": join(fpath, "switch_activated_middle_click.png"),
-		"onRightClickBackgroundImage": join(fpath, "switch_activated_right_click.png"),
-		"disableBackgroundImage": join(fpath, "switch_activated_disable.png"),
+		"backgroundImage": join(images_path, "activated.png"),
+		"onHoverBackgroundImage": join(images_path, "activated_hover.png"),
+		"onClickBackgroundImage": join(images_path, "activated_click.png"),
+		"onMiddleClickBackgroundImage": join(images_path, "activated_middle_click.png"),
+		"onRightClickBackgroundImage": join(images_path, "activated_right_click.png"),
+		"disableBackgroundImage": join(images_path, "activated_disable.png"),
 
-		"desactivatedBackgroundImage": join(fpath, "switch_desactivated.png"),
-		"desactivatedOnHoverBackgroundImage": join(fpath, "switch_desactivated_hover.png"),
-		"desactivatedOnClickBackgroundImage": join(fpath, "switch_desactivated_click.png"),
-		"desactivatedOnMiddleClickBackgroundImage": join(fpath, "switch_desactivated_middle_click.png"),
-		"desactivatedOnRightClickBackgroundImage": join(fpath, "switch_desactivated_right_click.png"),
-		"desactivatedDisableBackgroundImage": join(fpath, "switch_desactivated_disable.png")
+		"desactivatedBackgroundImage": join(images_path, "desactivated.png"),
+		"desactivatedOnHoverBackgroundImage": join(images_path, "desactivated_hover.png"),
+		"desactivatedOnClickBackgroundImage": join(images_path, "desactivated_click.png"),
+		"desactivatedOnMiddleClickBackgroundImage": join(images_path, "desactivated_middle_click.png"),
+		"desactivatedOnRightClickBackgroundImage": join(images_path, "desactivated_right_click.png"),
+		"desactivatedDisableBackgroundImage": join(images_path, "desactivated_disable.png")
 	}
 
 	def __init__(self, gui, pos, **kwargs):
@@ -1172,3 +1177,38 @@ class Toast_widget(Text):
 			get_view().remove_toast()
 			get_task_manager().remove_task("fade_toast_%s" % self.id)
 		self.config(textColor=(r, g, b, a))
+
+
+class Waiting_wheel(Image_widget):
+
+	DEFAULT_KWARGS = {
+		"wheelImage": join(Path.IMAGES, "waiting_wheel", "{theme_color}.png"),
+		"rotationSpeed": 1
+	}
+
+	def __init__(self, gui, pos, **kwargs):
+		Waiting_wheel.updateDefaultKwargs(kwargs)
+		super().__init__(gui, pos, kwargs["wheelImage"], **kwargs)
+		self.is_rotating = False
+		self.last_time = 0
+
+	def start(self):
+		if not self.is_rotating:
+			self.last_time = time.time()
+			self.is_rotating = True
+
+	def stop(self):
+		self.is_rotating = False
+		self.last_time = 0
+
+	def update(self):
+		if self.is_rotating:
+			t = time.time()
+			deltatime = t - self.last_time
+			self.last_time = t
+			self.rotate(deltatime * self.kwargs["rotationSpeed"])
+
+	def config(self, **kwargs):
+		if "wheelImage" in kwargs:
+			self.loadImage(kwargs["wheelImage"])
+		super().config(**kwargs)

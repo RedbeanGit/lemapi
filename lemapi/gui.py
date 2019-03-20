@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from lemapi.api import get_theme_color
 from lemapi.constants import App, Path
 from lemapi.util import read_json
 
@@ -23,6 +24,9 @@ class GUI(object):
         pygame.display.set_caption(App.NAME)
 
     def load_image(self, path):
+        if "{theme_color}" in path:
+            path = path.format(theme_color=get_theme_color())
+
         if os.path.exists(path):
             try:
                 self.images[path] = pygame.image.load(path)
@@ -36,6 +40,9 @@ class GUI(object):
                 path)
 
     def get_image(self, path, alpha = True):
+        if "{theme_color}" in path:
+            path = path.format(theme_color=get_theme_color())
+            
         if path in self.images:
             if alpha:
                 return self.images[path].convert_alpha()
