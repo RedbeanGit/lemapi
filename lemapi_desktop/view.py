@@ -63,7 +63,7 @@ class Desktop_view(View):
         lm.km.add_key_down_event(event, K_RETURN)
         lm.cm.add_button_pressed_event(event, "button_a")
 
-        for widget in self.widgets["app_group"].app_widgets:
+        for widget in w.app_widgets:
             event = Event(start_app, widget.app)
             widget.endClickEvents.append(event)
 

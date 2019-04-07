@@ -270,4 +270,5 @@ class App_descriptor(Menu_widget):
 
     def initWidgets(self):
         w, h = self.kwargs["size"]
-        self.addSubWidget("title_text", Text, ())
+        self.addSubWidget("title_text", Text, (w*0.5, h*0.05), app.get_name(), \
+            anchor=(0, -1))

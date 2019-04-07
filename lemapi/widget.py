@@ -1212,3 +1212,134 @@ class Waiting_wheel(Image_widget):
 		if "wheelImage" in kwargs:
 			self.loadImage(kwargs["wheelImage"])
 		super().config(**kwargs)
+
+
+class Separator_widget(Widget):
+
+	DEFAULT_KWARGS = {
+		"lineThickness": 2,
+		"lineColor": (0, 0, 0)
+	}
+
+	def __init__(self, gui, pos, pos2, **kwargs):
+		Separator_widget.updateDefaultKwargs(kwargs)
+		super().__init__(gui, pos, **kwargs)
+		self.pos2 = list(pos2)
+
+	def update(self):
+		super().update()
+		self.gui.draw_line(self.kwargs["lineColor"], self.pos, self.pos2, self.kwargs["lineThickness"])
+
+
+class List_widget(Menu_widget):
+
+	DEFAULT_KWARGS = {
+		"itemTextKwargs": {
+			"anchor": (0, 0),
+			"textColor": (0, 0, 0, 255)
+		},
+		"itemHeight": 25,
+		"itemBackgroundImage": join(Path.IMAGES, "no_image.png"),
+		"itemOnClickBackgroundImage": join(Path.IMAGES, "no_image.png"),
+		"itemOnRightClickBackgroundImage": join(Path.IMAGES, "no_image.png"),
+		"itemOnMiddleClickBackgroundImage": join(Path.IMAGES, "no_image.png"),
+		"itemOnHoverBackgroundImage": join(Path.IMAGES, "no_image.png"),
+		"itemDisableBackgroundImage": join(Path.IMAGES, "no_image.png"),
+		"itemBorderSize": 0
+	}
+
+	def __init__(self, gui, pos, **kwargs):
+		List_widget.updateDefaultKwargs(kwargs)
+		super().__init__(gui, pos, **kwargs)
+
+		self.selectedItem = None
+
+	def addItem(self, name):
+		w, h = self.kwargs["size"]
+		itemName = "{name}_button".format(name=name)
+		event = Event(self.onEndClickItem, name)
+
+		self.addSubWidget(itemName, Button, (0, h), \
+			size=(w, self.kwargs["itemHeight"]), text=name, \
+			textKwargs=self.kwargs["itemTextKwargs"], \
+			backgroundImage=self.kwargs["itemBackgroundImage"], \
+			onClickBackgroundImage=self.kwargs["itemOnClickBackgroundImage"], \
+			onHoverBackgroundImage=self.kwargs["itemOnHoverBackgroundImage"], \
+			onRightClickBackgroundImage=self.kwargs["itemOnRightClickBackgroundImage"], \
+			onMiddleClickBackgroundImage=self.kwargs["itemOnMiddleClickBackgroundImage"], \
+			disableBackgroundImage=self.kwargs["itemDisableBackgroundImage"],
+			borderSize=self.kwargs["itemBorderSize"])
+
+		self.subWidgets["{name}_button".format(name=name)].endClickEvents.append(event)
+		self.kwargs["size"] = (w, h + self.kwargs["itemHeight"])
+		self.loadBackgroundImage()
+
+	def removeItem(self, name):
+		itemName = "{name}_button".format(name=name)
+		self.removeSubWidget(itemName)
+
+	def onEndClickItem(self, name):
+		self.selectedItem = name
+
+
+class Hiddable_list_widget(Button):
+
+	DEFAULT_KWARGS = {
+		"textKwargs": {
+			"anchor": (0, 0),
+			"textColor": (0, 0, 0, 255)
+		},
+		"textAnchor": (0, 0),
+		"listKwargs": {}
+	}
+
+	def __init__(self, gui, pos, **kwargs):
+		Hiddable_list_widget.updateDefaultKwargs(kwargs)
+		super().__init__(gui, pos, **kwargs)
+
+		self.kwargs["listKwargs"]["size"] = (self.kwargs["size"][0], 0)
+		self.kwargs["listKwargs"]["itemHeight"] = self.kwargs["size"][1]
+		self.listWidget = List_widget(self.gui, self.getRealPos(), **self.kwargs["listKwargs"])
+		self.isOpened = False
+
+	def onEndClick(self):
+		super().onEndClick()
+
+		if self.isOpened:
+			self.close()
+		else:
+			self.open()
+
+	def onEndClickOut(self):
+		super().onEndClickOut()
+		self.close()
+
+	def update(self):
+		super().update()
+
+		if self.isOpened:
+			self.listWidget.update()
+
+	def onEvent(self, event):
+		if self.isOpened:
+			self.listWidget.onEvent(event)
+		super().onEvent(event)
+
+	def open(self):
+		self.isOpened = True
+
+	def close(self):
+		if self.isOpened:
+			self.isOpened = False
+
+			if self.listWidget.selectedItem != None:
+				self.config(text=self.listWidget.selectedItem)
+
+	def getSelectedItem(self):
+		return self.listWidget.selectedItem
+
+	def addItem(self, name):
+		self.listWidget.addItem(name)
+
+	def removeItem(self, name):
+		self.listWidget.removeItem(name)

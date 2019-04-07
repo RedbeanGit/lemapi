@@ -4,6 +4,7 @@ __author__ = "Julien Dubois"
 __version__ = "0.1.0"
 
 import ftplib
+import os
 import socket
 import threading
 
@@ -143,3 +144,54 @@ class Client:
         if self.connected:
             self.socket.close()
             self.connected = False
+
+class Wifi:
+    @staticmethod
+    def disable():
+        os.system("dhclient -r wlan0")
+        os.system("ifdown wlan0")
+        os.system("dhclient -v wlan0")
+
+    @staticmethod
+    def enable():
+        os.system("dhclient -r wlan0")
+        os.system("ifup wlan0")
+        os.system("dhclient -v wlan0")
+
+    @staticmethod
+    def get_current_ssid():
+        with open("/etc/wpa_supplicant/wpa_supplicant.conf", "r") as file:
+            content = file.read()
+            content = content.split("ssid=")[1]
+            content = content.split("\"")[1]
+        return content
+
+    @staticmethod
+    def add_network(ssid, psk, priority=None):
+        with open("/etc/wpa_supplicant/{ssid}".format(ssid=ssid), "w") as file:
+            file.write("country=FR\n")
+            file.write("ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\n")
+            file.write("update_config=1\n")
+            file.write("network={\n")
+            file.write('  ssid="{ssid}"\n'.format(ssid=ssid))
+            file.write('  psk="{psk}"\n'.format(psk=psk))
+            if priority:
+                file.write('  priority={priority}\n'.format(priority))
+            file.write("}\n")
+
+    @staticmethod
+    def connect(ssid):
+        path = "/etc/wpa_supplicant/{ssid}".format(ssid=ssid)
+
+        if os.path.exists(path):
+            with open(path, "r") as file:
+                content = file.read()
+            with open("/etc/wpa_supplicant/wpa_supplicant.conf", "w") as file:
+                file.write(content)
+
+            os.system("dhclient -r wlan0")
+            os.system("ifdown wlan0")
+            os.system("ifup wlan0")
+            os.system("dhclient -v wlan0")
+        else:
+            print("[lemapi] [WARNING] [Wifi.connect] Unknown ssid '{ssid}'".format(ssid=ssid))

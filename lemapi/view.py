@@ -39,6 +39,11 @@ class View(object):
             self.toast.destroy()
             self.toast = None
 
+    def clear(self):
+        for name, widget in tuple(self.widgets.items()):
+            widget.destroy()
+            self.widgets.pop(name)
+
     def update(self):
         for widget in tuple(self.widgets.values()):
             widget.update()
