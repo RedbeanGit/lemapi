@@ -7,6 +7,7 @@ Created on 02/01/2018
 """
 
 from lemapi.api import stop_app, stop_all_activities, stop_audio_player
+from lemapi.constants import App
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
@@ -29,40 +30,17 @@ from gi.repository import Gdk
 
 
 def get_monitor_size():
-	"""
-	Return the screen size in mm.
-
-	:rtype: tuple
-	:returns: (width, height) tuple where width and height are ints which
-		represent the default screen size in millimeters.
-	"""
-
 	display = Gdk.Display.get_default()
 	monitor = display.get_monitor(0)
 	return monitor.get_width_mm(), monitor.get_height_mm()
 
 
 def get_screen_size():
-	"""
-	Return the screen size in pixels.
-
-	:rtype: tuple
-	:returns: (width, height) tuple where width and height are ints which
-		represent the default screen size in pixels.
-	"""
-
 	screen = Gdk.Screen.get_default()
 	return screen.get_width(), screen.get_height()
 
 
 def get_screen_ratio():
-	"""
-	Return the screen resolution (width / height).
-
-	:rtype: float
-	:returns: A floating point value representing the ratio width / height.
-	"""
-
 	w, h = get_screen_size()
 	if h:
 		return w / h
@@ -80,105 +58,53 @@ def get_monitor_density():
 ################################################################################
 
 
-def resize_image(image, newSize, antialiasing=True):
-	"""
-	Resize an image (a pygame surface).
-	This function comes from the Pyoro project.
-
-	:type image: pygame.surface.Surface
-	:param image: The image to resize.
-
-	:type newSize: tuple
-	:param newSize: The new size of the image in a (width, height) tuple where
-		width and height are integers.
-
-	:type antialiasing: bool
-	:param antialiasing: (Optional). Use antialiasing algorithms to resize image.
-		Default is True.
-
-	:rtype: pygame.surface.Surface
-	:returns: A new pygame surface with the given size.
-	"""
-
-	newSize = (int(newSize[0]), int(newSize[1]))
+def resize_image(image, new_size, antialiasing=True):
+	new_size = (int(new_size[0]), int(new_size[1]))
 	if antialiasing:
-		return pygame.transform.smoothscale(image, newSize)
-	return pygame.transform.scale(image, newSize)
+		return pygame.transform.smoothscale(image, new_size)
+	return pygame.transform.scale(image, new_size)
 
 def invert_image(image, vertical, horizontal):
-	"""
-	Revert an image (a pygame surface) as if it was looking into a mirror.
-
-	:type image: pygame.surface.Surface
-	:param image: The image to revert.
-
-	:type vertical: bool
-	:param vertical: If True, the image will be reverted vertically.
-
-	:type horizontal: bool
-	:param horizontal: If True, the image will be reverted horizontally.
-
-	:rtype: pygame.surface.Surface
-	:returns: A new pygame surface reverted.
-	"""
-
 	return pygame.transform.flip(image, vertical, horizontal)
 
-def stretch_image(image, newSize, borderSize):
-	"""
-	Resize an image (a pygame surface) but do not deform it. It only resize
-	borders and center as 9-path images. Useful for buttons or gui frames.
-
-	:type image: pygame.surface.Surface
-	:param image: The image to resize.
-
-	:type newSize: tuple
-	:param newSize: The new size to give to the output image.
-
-	:type borderSize: int
-	:param borderSize: The width of the borders which can be stretch.
-
-	:rtype: pygame.surface.Surface
-	:returns: A new pygame surface with the given size.
-	"""
-
-	newSize = (int(newSize[0]), int(newSize[1]))
-	if borderSize < newSize[0] / 2 and borderSize < newSize[1] / 2:
+def stretch_image(image, new_size, border_size):
+	new_size = (int(new_size[0]), int(new_size[1]))
+	if border_size < new_size[0] / 2 and border_size < new_size[1] / 2:
 		if image.get_alpha() == None:
-			back = pygame.Surface(newSize).convert()
+			back = pygame.Surface(new_size).convert()
 		else:
-			back = pygame.Surface(newSize, pygame.SRCALPHA, 32).convert_alpha()
+			back = pygame.Surface(new_size, pygame.SRCALPHA, 32).convert_alpha()
 
-		sideLength = (image.get_size()[0] - borderSize * 2, image.get_size()[1] \
-			- borderSize * 2)
-		newSideLength = (newSize[0] - borderSize * 2, newSize[1] - borderSize * 2)
+		side_len = (image.get_size()[0] - border_size * 2, image.get_size()[1] \
+			- border_size * 2)
+		new_size_len = (new_size[0] - border_size * 2, new_size[1] - border_size * 2)
 
-		back.blit(image.subsurface((0, 0), (borderSize, borderSize)).copy(), (0, 0))
-		back.blit(pygame.transform.scale(image.subsurface((borderSize, 0), \
-			(sideLength[0], borderSize)).copy(), (newSideLength[0], borderSize)), \
-			(borderSize, 0))
-		back.blit(image.subsurface((sideLength[0] + borderSize, 0), \
-			(borderSize, borderSize)).copy(), (newSideLength[0] + borderSize, 0))
-		back.blit(pygame.transform.scale(image.subsurface((0, borderSize), \
-			(borderSize, sideLength[1])).copy(), (borderSize,  newSideLength[1])), \
-			(0, borderSize))
-		back.blit(pygame.transform.scale(image.subsurface((borderSize, borderSize), \
-			(sideLength[0], sideLength[1])), (newSideLength[0], newSideLength[1])), \
-			(borderSize, borderSize))
-		back.blit(pygame.transform.scale(image.subsurface((sideLength[0] \
-			+ borderSize, borderSize), (borderSize, sideLength[1])).copy(), \
-			(borderSize, newSideLength[1])), (newSideLength[0] + borderSize, \
-			borderSize))
-		back.blit(image.subsurface((0, sideLength[1] + borderSize), (borderSize, \
-			borderSize)).copy(), (0, newSideLength[1] + borderSize))
-		back.blit(pygame.transform.scale(image.subsurface((borderSize, sideLength[1] \
-			+ borderSize), (sideLength[0], borderSize)).copy(), (newSideLength[0], \
-			borderSize)), (borderSize, newSideLength[1] + borderSize))
-		back.blit(image.subsurface((sideLength[0] + borderSize, sideLength[1] + \
-			borderSize), (borderSize, borderSize)).copy(), (newSideLength[0] + \
-			borderSize, newSideLength[1] + borderSize))
+		back.blit(image.subsurface((0, 0), (border_size, border_size)).copy(), (0, 0))
+		back.blit(pygame.transform.scale(image.subsurface((border_size, 0), \
+			(side_len[0], border_size)).copy(), (new_size_len[0], border_size)), \
+			(border_size, 0))
+		back.blit(image.subsurface((side_len[0] + border_size, 0), \
+			(border_size, border_size)).copy(), (new_size_len[0] + border_size, 0))
+		back.blit(pygame.transform.scale(image.subsurface((0, border_size), \
+			(border_size, side_len[1])).copy(), (border_size,  new_size_len[1])), \
+			(0, border_size))
+		back.blit(pygame.transform.scale(image.subsurface((border_size, border_size), \
+			(side_len[0], side_len[1])), (new_size_len[0], new_size_len[1])), \
+			(border_size, border_size))
+		back.blit(pygame.transform.scale(image.subsurface((side_len[0] \
+			+ border_size, border_size), (border_size, side_len[1])).copy(), \
+			(border_size, new_size_len[1])), (new_size_len[0] + border_size, \
+			border_size))
+		back.blit(image.subsurface((0, side_len[1] + border_size), (border_size, \
+			border_size)).copy(), (0, new_size_len[1] + border_size))
+		back.blit(pygame.transform.scale(image.subsurface((border_size, side_len[1] \
+			+ border_size), (side_len[0], border_size)).copy(), (new_size_len[0], \
+			border_size)), (border_size, new_size_len[1] + border_size))
+		back.blit(image.subsurface((side_len[0] + border_size, side_len[1] + \
+			border_size), (border_size, border_size)).copy(), (new_size_len[0] + \
+			border_size, new_size_len[1] + border_size))
 		return back
-	print("[lemapi] [WARNING] [util.stretch_image] borderSize must be inferior to the half size" \
+	print("[lemapi] [WARNING] [util.stretch_image] border_size must be inferior to the half size" \
 		+ " of the surface")
 	return image
 
@@ -286,4 +212,31 @@ def exit(errorLevel = 0):
 
 
 def getusername():
+	if App.RPI_ENV:
+		return "pi"
 	return getpass.getuser()
+
+
+def get_linux_system_info(prop):
+	infos = read_file("/etc/os-release")
+	infos = infos.split("\n")
+	dic = {}
+
+	for info in infos[:-1]:
+		key, value = info.split("=")
+		dic[key] = value.replace('"', "")
+
+	if prop in dic:
+		return dic[prop]
+
+
+################################################################################
+### Decorators #################################################################
+################################################################################
+
+
+def rpi_only(fct):
+	def wrapper(*args, **kwargs):
+		if App.RPI_ENV:
+			return fct(*args, **kwargs)
+	return wrapper

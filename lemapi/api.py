@@ -96,12 +96,6 @@ def get_audio_player():
     return Instance.audio_player
 
 
-def reload_theme():
-    for activity in Instance.activities:
-        activity.view.clear()
-        activity.view.init_widgets()
-
-
 def restart_app():
     if Instance.app:
         stop_all_activities()

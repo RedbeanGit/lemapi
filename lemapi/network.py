@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from lemapi.util import rpi_only
+
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
 
@@ -104,7 +106,9 @@ class Client:
         self.port = port
         self.connected = False
 
-    def connect(self):
+    def connect(self, timeout=None):
+        if timeout:
+            self.socket.settimeout(timeout)
         try:
             self.socket.connect((self.address, self.port))
             self.connected = True
@@ -147,18 +151,21 @@ class Client:
 
 class Wifi:
     @staticmethod
+    @rpi_only
     def disable():
         os.system("dhclient -r wlan0")
         os.system("ifdown wlan0")
         os.system("dhclient -v wlan0")
 
     @staticmethod
+    @rpi_only
     def enable():
         os.system("dhclient -r wlan0")
         os.system("ifup wlan0")
         os.system("dhclient -v wlan0")
 
     @staticmethod
+    @rpi_only
     def get_current_ssid():
         with open("/etc/wpa_supplicant/wpa_supplicant.conf", "r") as file:
             content = file.read()
@@ -167,6 +174,7 @@ class Wifi:
         return content
 
     @staticmethod
+    @rpi_only
     def add_network(ssid, psk, priority=None):
         with open("/etc/wpa_supplicant/{ssid}".format(ssid=ssid), "w") as file:
             file.write("country=FR\n")
@@ -180,6 +188,7 @@ class Wifi:
             file.write("}\n")
 
     @staticmethod
+    @rpi_only
     def connect(ssid):
         path = "/etc/wpa_supplicant/{ssid}".format(ssid=ssid)
 

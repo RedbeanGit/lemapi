@@ -10,8 +10,10 @@ from os.path import join, dirname, abspath
 class App(object):
     NAME = "LemAPI"
     GPIO_ENABLE = False
+    RPI_ENV = False
     SCREEN_SIZE = (800, 480)
     SPLASH_ANIMATION = True
+    VERSION = "0.2.0"
     DEFAULT_SETTINGS = {
         "sound_volume": 1,
         "theme_color": "white",

@@ -1297,8 +1297,15 @@ class Hiddable_list_widget(Button):
 		Hiddable_list_widget.updateDefaultKwargs(kwargs)
 		super().__init__(gui, pos, **kwargs)
 
-		self.kwargs["listKwargs"]["size"] = (self.kwargs["size"][0], 0)
-		self.kwargs["listKwargs"]["itemHeight"] = self.kwargs["size"][1]
+		if "size" not in self.kwargs["listKwargs"]:
+			self.kwargs["listKwargs"]["size"] = (self.kwargs["size"][0], 0)
+		if "itemHeight" not in self.kwargs["listKwargs"]:
+			self.kwargs["listKwargs"]["itemHeight"] = self.kwargs["size"][1]
+		if "textKwargs" not in self.kwargs["listKwargs"]:
+			self.kwargs["listKwargs"]["itemTextKwargs"] = self.kwargs["textKwargs"]
+		if "backgroundImage" not in self.kwargs["listKwargs"]:
+			self.kwargs["listKwargs"]["backgroundImage"] = self.kwargs["backgroundImage"]
+
 		self.listWidget = List_widget(self.gui, self.getRealPos(), **self.kwargs["listKwargs"])
 		self.isOpened = False
 
