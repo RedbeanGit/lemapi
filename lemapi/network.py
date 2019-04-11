@@ -166,6 +166,29 @@ class Wifi:
 
     @staticmethod
     @rpi_only
+    def get_known_ssid():
+        networks = []
+        path = "/etc/wpa_supplicant/networks.conf"
+        if os.path.exists(path):
+            with open(path, "r") as file:
+                networks = [network for network in file.readlines()]
+        else:
+            print("[lemapi] [WARNING] [Wifi.get_known_ssid] Unable to find {path}".format(path=path))
+        return networks
+
+    @staticmethod
+    @rpi_only
+    def get_network_psk(ssid):
+        path = "/etc/wpa_supplicant/network_{ssid}.conf".format(ssid=ssid)
+
+        if os.path.exists(path):
+            with open(path, "r") as file:
+                content = file.read()
+            psk = content.split("network={\n")[1].split("}\n")[0].split('psk="')[1].split('"')[0]
+        return psk
+
+    @staticmethod
+    @rpi_only
     def get_current_ssid():
         with open("/etc/wpa_supplicant/wpa_supplicant.conf", "r") as file:
             content = file.read()
@@ -175,8 +198,8 @@ class Wifi:
 
     @staticmethod
     @rpi_only
-    def add_network(ssid, psk, priority=None):
-        with open("/etc/wpa_supplicant/{ssid}".format(ssid=ssid), "w") as file:
+    def add_network(ssid, psk="", priority=None):
+        with open("/etc/wpa_supplicant/network_{ssid}.conf".format(ssid=ssid), "w") as file:
             file.write("country=FR\n")
             file.write("ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev\n")
             file.write("update_config=1\n")
@@ -187,10 +210,13 @@ class Wifi:
                 file.write('  priority={priority}\n'.format(priority))
             file.write("}\n")
 
+        with open("/etc/wpa_supplicant/networks.conf", "a") as file:
+            file.write(ssid + "\n")
+
     @staticmethod
     @rpi_only
     def connect(ssid):
-        path = "/etc/wpa_supplicant/{ssid}".format(ssid=ssid)
+        path = "/etc/wpa_supplicant/network_{ssid}.conf".format(ssid=ssid)
 
         if os.path.exists(path):
             with open(path, "r") as file:

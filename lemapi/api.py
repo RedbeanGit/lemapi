@@ -206,6 +206,10 @@ def get_settings():
     return get_default_settings()
 
 
+def set_settings(settings):
+    Instance.settings = settings
+
+
 def get_theme_color():
     color = Instance.settings.get("theme_color", "white")
 
