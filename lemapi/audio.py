@@ -147,7 +147,10 @@ class Mixer(object):
 		for sound in self.sounds:
 			sound.stop()
 		self.sounds.clear()
-		self.playing = False
+
+	def stop_audio(self):
+		for sound in self.sounds:
+			sound.stop()
 
 	def play(self):
 		self.playing = True
