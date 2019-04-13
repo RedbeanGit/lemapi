@@ -899,7 +899,8 @@ class Virtual_keyboard(Menu_widget):
 
 class Setting_bar(Eventable_widget):
 
-	images_path = join(Path.IMAGES, "setting bar", "{theme_color}")
+	images_path = join(Path.IMAGES, "setting bar")
+	images_path2 = join(images_path, "{theme_color}")
 
 	DEFAULT_KWARGS = {
 		"lineThickness": 16,
@@ -917,12 +918,12 @@ class Setting_bar(Eventable_widget):
 		"onRightClickLineImage": join(images_path, "line_right_click.png"),
 		"disableLineImage": join(images_path, "line_disable.png"),
 
-		"cursorImage": join(images_path, "cursor.png"),
-		"onHoverCursorImage": join(images_path, "cursor_hover.png"),
-		"onClickCursorImage": join(images_path, "cursor_click.png"),
-		"onMiddleClickCursorImage": join(images_path, "cursor_middle_click.png"),
-		"onRightClickCursorImage": join(images_path, "cursor_right_click.png"),
-		"disableCursorImage": join(images_path, "cursor_disable.png")
+		"cursorImage": join(images_path2, "cursor.png"),
+		"onHoverCursorImage": join(images_path2, "cursor_hover.png"),
+		"onClickCursorImage": join(images_path2, "cursor_click.png"),
+		"onMiddleClickCursorImage": join(images_path2, "cursor_middle_click.png"),
+		"onRightClickCursorImage": join(images_path2, "cursor_right_click.png"),
+		"disableCursorImage": join(images_path2, "cursor_disable.png")
 	}
 
 	def __init__(self, gui, pos, **kwargs):
@@ -1156,7 +1157,8 @@ class Toast_widget(Text):
 	DEFAULT_KWARGS = {
 		"duration": 5,
 		"anchor": (0, 0),
-		"textColor": (100, 100, 100, 255)
+		"textColor": (100, 100, 100, 255),
+		"backgroundColor": (255, 255, 255, 100)
 	}
 
 	def __init__(self, gui, pos, text, **kwargs):
@@ -1165,18 +1167,32 @@ class Toast_widget(Text):
 
 		self.fade_task = Analog_task_delay(self.kwargs["duration"], self.fade)
 		self.last_fade_value = 0
+
+		if len(self.kwargs["backgroundColor"]) == 4:
+			self.first_bg_color_alpha = self.kwargs["backgroundColor"][3]
+		else:
+			self.first_bg_color_alpha = 0
+
 		self.id = random.random()
 		get_task_manager().add_task("fade_toast_%s" % self.id, self.fade_task)
 
 	def fade(self, value):
 		r, g, b, a = self.kwargs["textColor"]
 		a = a - 255 * (value - self.last_fade_value)
-		self.last_fade_value = value
 		if a <= 0:
 			a = 0
 			get_view().remove_toast()
 			get_task_manager().remove_task("fade_toast_%s" % self.id)
 		self.config(textColor=(r, g, b, a))
+		
+		if len(self.kwargs["backgroundColor"]) == 4:
+			r2, g2, b2, a2 = self.kwargs["backgroundColor"]
+			a2 = a2 - self.first_bg_color_alpha * (value - self.last_fade_value)
+			if a2 <= 0:
+				a2 = 0
+			self.config(backgroundColor=(r2, g2, b2, a2))
+
+		self.last_fade_value = value
 
 
 class Waiting_wheel(Image_widget):

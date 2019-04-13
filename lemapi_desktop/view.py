@@ -44,11 +44,9 @@ class Desktop_view(View):
         w, h = get_gui().get_size()
         bg_path = join(Path.IMAGES, "background", get_theme_color() + ".png")
 
-        self.add_widget("background_image", Image_widget, (w // 2, h // 2), \
-            bg_path, size=(w, h), anchor=(0, 0))
+        self.add_widget("background_image", Image_widget, (w // 2, h // 2), bg_path, size=(w, h), anchor=(0, 0))
         self.add_widget("app_group", App_group, (w, h // 2), anchor=(0, 0))
-        self.add_widget("clock_widget", Clock_widget, (w * 0.1, h * 0.2), \
-            anchor=(-1, 0))
+        self.add_widget("clock_widget", Clock_widget, (w * 0.1, h * 0.2), anchor=(-1, 0))
 
     def init_events(self):
         lm = get_listener_manager()

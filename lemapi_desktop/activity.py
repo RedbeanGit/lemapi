@@ -121,7 +121,6 @@ class Desktop_activity(Activity):
 
     def load_apps(self):
         apps = Application.get_local_apps()
-        path = Path.GAMES.format(user=getusername())
         for app_path in apps:
             app = Application(app_path)
             app.load_infos()

@@ -21,6 +21,7 @@ class App(object):
         "custom_date": (0, 0, 0),
         "custom_time": (0, 0)
     }
+    DEFAULT_APPS = ("Pyoro", "Robot", "Settings")
     THEME_COLORS = ("white", "blue", "green", "red", "magenta", "orange", "cyan", "yellow")
 
 

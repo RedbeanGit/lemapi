@@ -33,6 +33,7 @@ class Player(object):
 		self.lock = threading.RLock()
 		self.active = False
 		self.speed = 1
+		self.volume = 1
 
 		self.stream = self.pa.open(
 				format = self.pa.get_format_from_width(
@@ -106,6 +107,10 @@ class Player(object):
 		if speed > 0:
 			self.speed = speed
 
+	def set_volume(self, volume):
+		if volume >= 0 and volume <= 0:
+			self.volume = volume
+
 	def write(self, chunk):
 		self.buffer = audioop.add(self.buffer, chunk, self.sample_width)
 
@@ -177,7 +182,7 @@ class Mixer(object):
 						try:
 							mixed_chunk = audioop.add(mixed_chunk, audioop.mul( \
 								chunk, self.player.sample_width, sound.volume * \
-								self.volume), self.player.sample_width)
+								self.volume * self.player.volume), self.player.sample_width)
 						except Exception:
 							print("[lemapi] [WARNING] [Mixer.update] Something " \
 								+ "wrong happened when mixing 2 audio chunks")
