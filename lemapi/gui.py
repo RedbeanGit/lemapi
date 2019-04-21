@@ -39,7 +39,7 @@ class GUI(object):
             print("[lemapi] [WARNING] [GUI.load_image] Image '%s' not found" % \
                 path)
 
-    def get_image(self, path, alpha = True):
+    def get_image(self, path, alpha=True):
         if "{theme_color}" in path:
             path = path.format(theme_color=get_theme_color())
             
@@ -49,7 +49,10 @@ class GUI(object):
             return self.images[path].convert()
         print("[lemapi] [WARNING] [GUI.get_image] Image '%s' not loaded!" % \
             path)
-        return pygame.surface.Surface((16, 16))
+        return pygame.Surface((16, 16))
+
+    def get_empty_image(self, size=(16, 16)):
+        return pygame.Surface(size, pygame.SRCALPHA)
 
     def update(self):
         pygame.display.update(self.updated_rect)
@@ -108,4 +111,9 @@ class GUI(object):
     def get_size(self):
         if self.root_surface:
             return self.root_surface.get_size()
-        return (0, 0)
+        return (800, 480)
+
+    def get_current_surface(self):
+        if self.root_surface:
+            return self.root_surface.copy()
+        return self.get_empty_image(self.get_size())

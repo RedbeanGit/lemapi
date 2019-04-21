@@ -6,8 +6,9 @@ Provide useful functions.
 Created on 02/01/2018
 """
 
-from lemapi.api import stop_app, stop_all_activities, stop_audio_player
+from lemapi.api import stop_app, stop_all_activities, stop_audio_player, get_task_manager
 from lemapi.constants import App
+from lemapi.system_instance import Instance
 
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
@@ -204,9 +205,11 @@ def reload_module(module):
 ################################################################################
 
 
-def exit(errorLevel = 0):
+def exit(errorLevel=0):
 	stop_app()
+	Instance.activities[0].destroy()
 	stop_audio_player()
+	get_task_manager().clear()
 	print("[lemapi] [INFO] [exit] LemAPI stopped successfully!")
 	sys.exit(errorLevel)
 

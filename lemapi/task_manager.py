@@ -11,6 +11,8 @@ from lemapi.event_manager import Event
 __author__ = "Julien Dubois"
 __version__ = "0.1.0"
 
+import multiprocessing
+
 
 class Task_manager(object):
     def __init__(self):
@@ -22,7 +24,13 @@ class Task_manager(object):
 
     def remove_task(self, name):
         if name in self.tasks:
+            self.tasks[name].stop()
             self.tasks.pop(name)
+
+    def clear(self):
+        for task in tuple(self.tasks.values()):
+            task.stop()
+        self.tasks.clear()
 
     def update(self, deltatime):
         for name, task in tuple(self.tasks.items()):
@@ -43,6 +51,28 @@ class Task_delay(Event):
 
         if self.elapsed_time >= self.delay:
             self.call()
+
+    def stop(self):
+        self.obsolete = True
+
+
+class Loop_task_delay(Task_delay):
+    def __init__(self, delay, fct, *args, **kwargs):
+        super().__init__(delay, fct, *args, **kwargs)
+        self.stopping = False
+
+    def update(self, deltatime):
+        if not self.stopping:
+            self.elapsed_time += deltatime
+
+            if self.elapsed_time >= self.delay:
+                self.call()
+                self.elapsed_time = 0
+                self.obsolete = False
+
+    def stop(self):
+        self.stopping = True
+        self.obsolete = True
 
 
 class Analog_task_delay(Task_delay):

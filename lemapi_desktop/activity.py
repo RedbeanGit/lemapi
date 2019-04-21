@@ -12,7 +12,7 @@ import threading
 
 from lemapi.activity import Activity
 from lemapi.api import get_audio_player, get_gui, get_global_listener_manager, \
-    get_task_manager, get_save_path
+    get_task_manager, get_save_path, start_app, force_view_update
 from lemapi.application import Application
 from lemapi.audio import Mixer
 from lemapi.constants import Path, App
@@ -114,10 +114,16 @@ class Desktop_activity(Activity):
     def __init__(self, desktop_view):
         super().__init__(desktop_view)
         self.apps = []
+        self.init_mixer()
         self.load_apps()
         self.load_icons()
         print("[lemapi] [INFO] [Desktop_activity.__init__] Activity started " \
             + "successfully !")
+
+    def init_mixer(self):
+        ap = get_audio_player()
+        self.mixer = Mixer(ap)
+        ap.add_mixer(self.mixer)
 
     def load_apps(self):
         apps = Application.get_local_apps()
@@ -134,3 +140,23 @@ class Desktop_activity(Activity):
                 app, anchor=(0, 0))
             self.view.add_app(wname)
         self.view.reset_angle()
+
+    def wakeup(self):
+        self.play_appopen_sound()
+        self.view.start_appclose_transition()
+
+    def destroy(self):
+        self.view.set_quit_view()
+        force_view_update()
+        super().destroy()
+
+    def click_app(self, app):
+        self.play_appopen_sound()
+        self.view.start_appopen_transition(app)
+        get_task_manager().add_task("start_app", Task_delay(0.4, start_app, app))
+
+    def play_appopen_sound(self):
+        sound_path = join(Path.SOUNDS, "start_app.wav")
+        sound = get_audio_player().get_sound(sound_path)
+        sound.play()
+        self.mixer.add_sound(sound)

@@ -74,6 +74,9 @@ class Application(object):
 	def get_version(self):
 		return self.infos.get("version", "0.0.0")
 
+	def get_splash_path(self):
+		return os.path.join(self.path, self.infos.get("splash_image", "unknownImage.png"))
+
 	def run(self):
 		if self.has_function("main"):
 			try:

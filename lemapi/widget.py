@@ -420,6 +420,14 @@ class Button(Eventable_widget):
 		ax, ay = self.kwargs["textAnchor"]
 		return (x + w * (ax + 1) / 2, y + h * (ay + 1) / 2)
 
+	def setPos(self, pos):
+		x, y = self.pos
+		nx, ny = pos
+		vx, vy = nx - x, ny - y
+		super().setPos(pos)
+		tx, ty = self.text.pos
+		self.text.setPos((tx + vx, ty + vy))
+
 
 class Clickable_text(Text, Eventable_widget):
 	""" Clickable text widget """
@@ -558,11 +566,7 @@ class Image_widget(Widget):
 
 		Image_widget.updateDefaultKwargs(kwargs)
 		Widget.__init__(self, gui, pos, **kwargs)
-		tmp_size = self.kwargs["size"]
-		self.loadImage(imagePath)
-
-		if tmp_size != (0, 0):
-			self.resize(tmp_size)
+		self.change_image(imagePath)
 		self.rotated_overflow = [0, 0]
 
 	def loadImage(self, imagePath):
@@ -620,6 +624,13 @@ class Image_widget(Widget):
 
 	def set_opacity(self, opacity):
 		self.image.set_alpha(int(opacity))
+
+	def change_image(self, path):
+		tmp_size = self.kwargs["size"]
+		self.loadImage(path)
+
+		if tmp_size != (0, 0):
+			self.resize(tmp_size)
 
 	def config(self, **kwargs):
 		Widget.config(self, **kwargs)
@@ -1366,3 +1377,185 @@ class Hiddable_list_widget(Button):
 
 	def removeItem(self, name):
 		self.listWidget.removeItem(name)
+
+
+class Sub_gui(Widget):
+	def __init__(self, gui, pos, **kwargs):
+		super().__init__(gui, pos, **kwargs)
+		self.root_surface = self.gui.get_empty_image(self.kwargs["size"])
+
+	def create_root_surface(self):
+		self.root_surface = self.gui.get_empty_image(self.kwargs["size"])
+
+	def load_image(self, path):
+		self.gui.load_image(path)
+
+	def get_image(self, path, alpha=True):
+		return self.gui.get_image(path, alpha)
+
+	def get_empty_image(self, size=(16, 16)):
+		return self.gui.get_empty_image(size)
+
+	def update(self):
+		pos = self.getRealPos()
+		self.gui.draw_image(self.root_surface, pos)
+
+	def draw_image(self, image, pos):
+		self.root_surface.blit(image, pos)
+
+	def draw_color(self, color, pos, size):
+		self.root_surface.fill(color, (pos, size))
+
+	def draw_background_color(self, color):
+		self.root_surface.fill(color)
+
+	def draw_polygon(self, color, pos):
+		pygame.draw.polygon(self.root_surface, color, pos)
+
+	def draw_line(self, color, pos1, pos2, width=1):
+		pygame.draw.line(self.root_surface, color, pos1, pos2, width)
+
+	def get_size(self):
+		return self.root_surface.get_size()
+
+	def config(self, **kwargs):
+		super().config(**kwargs)
+		if "size" in kwargs:
+			self.create_root_surface()
+
+	def clear(self):
+		self.root_surface.fill((0, 0, 0, 0))
+
+
+class Scrollable_group(Menu_widget):
+
+	DEFAULT_KWARGS = {
+		"backgroundImage": join(Path.IMAGES, "no_image.png"),
+		"backgroundBorderSize": 0,
+		"lineColor": (150, 150, 150, 255),
+		"lineThickness": 2,
+		"horizontalScroll": True,
+		"verticalScroll": True
+	}
+
+	def __init__(self, gui, pos, **kwargs):
+		Scrollable_group.updateDefaultKwargs(kwargs)
+		super().__init__(gui, pos, **kwargs)
+
+		pos = self.getRealPos()
+		self.subGui = Sub_gui(gui, pos, size=list(self.kwargs["size"]))
+		self.oldWidgetGui = {}
+		self.clicked = False
+		self.lastMousePos = None
+		self.scrollPos = [0, 0]
+		self.maxPos = [0, 0, 0, 0]
+
+	def addSubWidget(self, widgetName, widgetType, pos, *widgetArgs, **widgetKwargs):
+		if widgetName in self.subWidgets:
+			print("[lemapi] [WARNING] [Scrollable_group.addSubWidget] A widget called " \
+				+ "'%s' already exists in this Scrollable_group !" % widgetName \
+				+ " Destroying it")
+			
+			if not self.widgetName[widgetName].isDestroyed:
+				self.subWidgets[widgetName].destroy()
+		
+		widget = widgetType(self.subGui, pos, *widgetArgs, **widgetKwargs)
+
+		x, y = widget.getRealPos()
+		w, h = widget.kwargs["size"]
+
+		if x < self.maxPos[0]:
+			self.maxPos[0] = x
+		if x + w > self.maxPos[2]:
+			self.maxPos[2] = x + w
+		if y < self.maxPos[1]:
+			self.maxPos[1] = y
+		if y + h > self.maxPos[3]:
+			self.maxPos[3] = y + h
+
+		self.subWidgets[widgetName] = widget
+
+	def removeSubWidget(self, widgetName):
+		if widgetName in self.subWidgets:
+			self.subWidgets[widgetName].gui = self.oldWidgetGui[widgetName]
+		super().removeSubWidget(widgetName)
+
+	def onEvent(self, event):
+		if event.type == MOUSEMOTION:
+			if self.clicked:
+				if self.lastMousePos:
+					x = event.pos[0] - self.lastMousePos[0]
+					y = event.pos[1] - self.lastMousePos[1]
+					self.lastMousePos = event.pos
+					self.scroll((x, y))
+				else:
+					self.lastMousePos = event.pos
+			x, y = event.pos
+			wx, wy = self.getRealPos()
+			event.pos = (x - wx, y - wy)
+		elif event.type == MOUSEBUTTONDOWN:
+			if event.button == 1:
+				self.clicked = True
+			x, y = event.pos
+			wx, wy = self.getRealPos()
+			event.pos = (x - wx, y - wy)
+		elif event.type == MOUSEBUTTONUP:
+			if event.button == 1:
+				self.clicked = False
+				self.lastMousePos = None
+			x, y = event.pos
+			wx, wy = self.getRealPos()
+			event.pos = (x - wx, y - wy)
+
+		super().onEvent(event)
+
+	def scroll(self, vel):
+		x, y = self.scrollPos
+		vx, vy = vel
+		w, h = self.kwargs["size"]
+		borderL = min(self.maxPos[0], 0)
+		borderR = max(self.maxPos[2], w)
+		borderT = min(self.maxPos[1], 0)
+		borderB = max(self.maxPos[3], h)
+
+		if x + vx < self.maxPos[0]:
+			vx = borderL - x
+		elif x + vx + w > self.maxPos[2]:
+			vx = borderR - x - w
+
+		if y + vy < self.maxPos[1]:
+			vy = borderT - y
+		elif y + vy + h > self.maxPos[3]:
+			vy = borderB - y - h
+
+		self.scrollPos = [x + vx, y + vy]
+
+		for widget in tuple(self.subWidgets.values()):
+			x, y = widget.pos
+			widget.setPos((x + vx, y + vy))
+
+	def drawNavBars(self):
+		w, h = self.kwargs["size"]
+		wx, wy = self.getRealPos()
+		rw = self.maxPos[2] - self.maxPos[0]
+		rh = self.maxPos[3] - self.maxPos[1]
+
+		if rh > h:
+			lh = h * h / rh
+			x = w - self.kwargs["lineThickness"] + wx
+			y = (self.scrollPos[1] - self.maxPos[1]) * h / rh + wy
+
+			self.gui.draw_line(self.kwargs["lineColor"], (x, y), (x, y + lh), width=self.kwargs["lineThickness"])
+
+		if rw > w:
+			lw = w * w / rw
+			x = (self.scrollPos[0] - self.maxPos[0]) * w / rw + wx
+			y = h - self.kwargs["lineThickness"] + wy
+
+			self.gui.draw_line(self.kwargs["lineColor"], (x, y), (x + lw, y), width=self.kwargs["lineThickness"])
+
+	def update(self):
+		self.subGui.clear()
+		super().update()
+		self.drawNavBars()
+		self.subGui.update()
