@@ -77,6 +77,12 @@ class Application(object):
 	def get_splash_path(self):
 		return os.path.join(self.path, self.infos.get("splash_image", "unknownImage.png"))
 
+	def get_desc_image_path(self):
+		return os.path.join(self.path, self.infos.get("desc_image", "unknownImage.png"))
+
+	def get_description(self):
+		return self.infos.get("description", "")
+
 	def run(self):
 		if self.has_function("main"):
 			try:

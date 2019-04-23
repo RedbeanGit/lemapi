@@ -108,7 +108,7 @@ class Player(object):
 			self.speed = speed
 
 	def set_volume(self, volume):
-		if volume >= 0 and volume <= 0:
+		if volume >= 0 and volume <= 1:
 			self.volume = volume
 
 	def write(self, chunk):

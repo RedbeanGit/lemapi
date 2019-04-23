@@ -206,11 +206,11 @@ def reload_module(module):
 
 
 def exit(errorLevel=0):
+	print("[lemapi] [INFO] Stopping LemAPI system")
 	stop_app()
 	Instance.activities[0].destroy()
 	stop_audio_player()
 	get_task_manager().clear()
-	print("[lemapi] [INFO] [exit] LemAPI stopped successfully!")
 	sys.exit(errorLevel)
 
 

@@ -471,7 +471,7 @@ class Editable_text(Clickable_text):
 		"cursorColor": (0, 0, 0)
 	}
 
-	def __init__(self, gui, pos, text, **kwargs):
+	def __init__(self, gui, pos, **kwargs):
 		self.isEditing = False
 		self.cursor = 0
 
@@ -1047,13 +1047,23 @@ class Setting_bar(Eventable_widget):
 	def getValue(self):
 		realPos = self.getRealPos()
 		if self.kwargs["size"][0] - self.kwargs["cursorWidth"] != 0:
-			return (self.cursorPos - realPos[0] - self.kwargs["cursorWidth"] \
+			value = (self.cursorPos - realPos[0] - self.kwargs["cursorWidth"] \
 				/ 2) / (self.kwargs["size"][0] - self.kwargs["cursorWidth"])
+
+			if value > 1:
+				return 1
+			elif value < 0:
+				return 0
+			return value
 		return 0.5
 
 	def getCursorPosWithValue(self, value):
 		return value * (self.kwargs["size"][0] - self.kwargs["cursorWidth"]) \
 			+ self.kwargs["cursorWidth"] / 2 + self.getRealPos()[0]
+
+	def onEndClickOut(self):
+		if self.clicked:
+			self.onEndClick()
 
 	def config(self, **kwargs):
 		Eventable_widget.config(self, **kwargs)

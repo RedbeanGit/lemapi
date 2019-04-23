@@ -259,7 +259,8 @@ class Clock_widget(Text):
 class App_descriptor(Menu_widget):
 
     DEFAULT_KWARGS = {
-        "size": (150, 150)
+        "size": (150, 150),
+        "maxLineCharacter": 10
     }
 
     def __init__(self, gui, pos, app, **kwargs):
@@ -270,5 +271,8 @@ class App_descriptor(Menu_widget):
 
     def initWidgets(self):
         w, h = self.kwargs["size"]
-        self.addSubWidget("title_text", Text, (w*0.5, h*0.05), app.get_name(), \
-            anchor=(0, -1))
+        c = self.kwargs["maxLineCharacter"]
+        desc = self.app.get_description()
+
+        self.addSubWidget("title_text", Text, (w*0.5, h*0.05), self.app.get_name(), anchor=(0, -1))
+        self.addSubWidget("app_image", Image_widget, (w*0.5, h*0.15), self.app.get_desc_image_path(), size=(w, h*0.3), anchor=(0, -1))

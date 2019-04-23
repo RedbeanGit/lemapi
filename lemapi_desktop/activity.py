@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from lemapi_desktop.util import load_images, load_sounds, load_musics, \
-    load_settings, exit
+    load_settings, exit, save_settings
 from lemapi_desktop.view import Desktop_view
 from lemapi_desktop.widget import App_widget
 
@@ -12,7 +12,7 @@ import threading
 
 from lemapi.activity import Activity
 from lemapi.api import get_audio_player, get_gui, get_global_listener_manager, \
-    get_task_manager, get_save_path, start_app, force_view_update
+    get_task_manager, get_save_path, start_app, force_view_update, get_settings
 from lemapi.application import Application
 from lemapi.audio import Mixer
 from lemapi.constants import Path, App
@@ -45,6 +45,7 @@ class Splash_activity(Activity):
             self.appear_loading(1)
 
         load_settings()
+        get_audio_player().set_volume(get_settings().get("sound_volume", 1))
         self.init_mixer()
         threading.Thread(target=self.load_resources).start()
 
@@ -148,6 +149,7 @@ class Desktop_activity(Activity):
     def destroy(self):
         self.view.set_quit_view()
         force_view_update()
+        save_settings()
         super().destroy()
 
     def click_app(self, app):
