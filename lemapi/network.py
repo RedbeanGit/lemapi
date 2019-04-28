@@ -230,3 +230,11 @@ class Wifi:
             os.system("dhclient -v wlan0")
         else:
             print("[lemapi] [WARNING] [Wifi.connect] Unknown ssid '{ssid}'".format(ssid=ssid))
+
+    @staticmethod
+    @rpi_only
+    def remove_network(ssid):
+        path = "/etc/wpa_supplicant/network_{ssid}.conf".format(ssid=ssid)
+
+        if os.path.exists(path):
+            os.remove(path)

@@ -23,15 +23,7 @@ import random
 import time
 
 from os.path import join
-from pygame.locals import MOUSEMOTION, MOUSEBUTTONDOWN, MOUSEBUTTONUP, KEYDOWN, \
-	KEYUP, K_BACKSPACE, K_TAB, K_CLEAR, K_RETURN, K_PAUSE, K_ESCAPE, K_SPACE, \
-	K_EXCLAIM, K_QUOTEDBL, K_HASH, K_DOLLAR, K_AMPERSAND, K_QUOTE, K_LEFTPAREN, \
-	K_RIGHTPAREN, K_ASTERISK, K_PLUS, K_COMMA, K_MINUS, K_PERIOD, K_SLASH, K_0, \
-	K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9, K_COLON, K_SEMICOLON, K_LESS, \
-	K_EQUALS, K_GREATER, K_QUESTION, K_AT, K_LEFTBRACKET, K_BACKSLASH, \
-	K_RIGHTBRACKET, K_CARET, K_UNDERSCORE, K_BACKQUOTE, K_a, K_b, K_c, K_d, K_e, \
-	K_f, K_g, K_h, K_i, K_j, K_k, K_l, K_m, K_n, K_o, K_p, K_q, K_r, K_s, K_t, \
-	K_u, K_v, K_w, K_x, K_y, K_z, K_LSHIFT, K_EURO
+from pygame.locals import *
 
 
 class Widget:
@@ -461,87 +453,6 @@ class Clickable_text(Text, Eventable_widget):
 		Text.update(self)
 
 
-class Editable_text(Clickable_text):
-
-	DEFAULT_KWARGS = {
-		"hintText": "",
-		"inputType": str,
-		"hintTextColor": (255, 255, 255, 100),
-		"cursorWidth": 2,
-		"cursorColor": (0, 0, 0)
-	}
-
-	def __init__(self, gui, pos, **kwargs):
-		self.isEditing = False
-		self.cursor = 0
-
-		Editable_text.updateDefaultKwargs(kwargs)
-		Clickable.__init__(self, gui, pos, self.kwargs["hintText"], **kwargs)
-
-	def update(self):
-		if not self.text:
-			self.font.fgcolor = self.kwargs["hintTextColor"]
-			surface, rect = self.font.render(str(self.kwargs["hint"]), \
-				bgcolor=self.kwargs["backgroundColor"])
-		else:
-			self.font.fgcolor = self.kwargs["textColor"]
-			surface, rect = self.font.render(str(self.text), \
-				bgcolor=self.kwargs["backgroundColor"])
-
-			if not self.isEditing:
-				if not self.kwargs["enable"]:
-					self.font.fgcolor = self.kwargs["disableTextColor"]
-				elif self.clicked:
-					self.font.fgcolor = self.kwargs["onClickTextColor"]
-				elif self.rightClicked:
-					self.font.fgcolor = self.kwargs["onRightClickTextColor"]
-				elif self.middleClicked:
-					self.font.fgcolor = self.kwargs["onMiddleClickTextColor"]
-				elif self.hovered:
-					self.font.fgcolor = self.kwargs["onHoverTextColor"]
-				else:
-					self.font.fgcolor = self.kwargs["textColor"]
-
-		rp = self.getRealPos()
-		if self.isEditing:
-			self.gui.draw_line(self.kwargs["cursorColor"], rp[0] + rect.width, \
-				rp[1] + rect.height, width=self.kwargs["cursorWidth"])
-
-		self.gui.draw_image(surface, rp)
-		Widget.update(self)
-
-	def startTyping(self):
-		self.isEditing = True
-		request_keyboard()
-
-	def stopTyping(self):
-		self.isEditing = False
-		close_keyboard()
-
-	def onClick(self):
-		Clickable_text.onClick(self)
-		if not self.isEditing:
-			self.startTyping()
-
-	def onEvent(self, event):
-		Clickable_text.onEvent(self, event)
-
-		if self.isEditing:
-			if event.type == KEYDOWN:
-				if event.key == K_BACKSPACE:
-					self.text = self.text[:-1]
-				elif event.type == K_RETURN:
-					self.stopTyping()
-				else:
-					self.text += pygame.key.name(event.type)
-
-	def config(self, **kwargs):
-		if "inputType" in kwargs:
-			if not callable(kwargs["inputType"]):
-				kwargs["inputType"] = self.kwargs["inputType"]
-		Clickable_text.config(self, **kwargs)
-
-
 class Image_widget(Widget):
 
 	DEFAULT_KWARGS = {
@@ -672,7 +583,7 @@ class Menu_widget(Widget):
 			print("[WARNING] [Menu_widget.addSubWidget] A widget called " \
 				+ "'%s' already exists in this Menu_widget !" % widgetName \
 				+ " Destroying it")
-			if not self.widgetName[widgetName].isDestroyed:
+			if not self.subWidgets[widgetName].isDestroyed:
 				self.subWidgets[widgetName].destroy()
 		realPos = self.getRealPos()
 		self.subWidgets[widgetName] = widgetType(self.gui, \
@@ -1178,8 +1089,8 @@ class Toast_widget(Text):
 	DEFAULT_KWARGS = {
 		"duration": 5,
 		"anchor": (0, 0),
-		"textColor": (100, 100, 100, 255),
-		"backgroundColor": (255, 255, 255, 100)
+		"textColor": (255, 255, 255, 255),
+		"backgroundColor": (0, 0, 0, 100)
 	}
 
 	def __init__(self, gui, pos, text, **kwargs):
@@ -1450,15 +1361,18 @@ class Scrollable_group(Menu_widget):
 
 	def __init__(self, gui, pos, **kwargs):
 		Scrollable_group.updateDefaultKwargs(kwargs)
-		super().__init__(gui, pos, **kwargs)
 
-		pos = self.getRealPos()
-		self.subGui = Sub_gui(gui, pos, size=list(self.kwargs["size"]))
 		self.oldWidgetGui = {}
 		self.clicked = False
 		self.lastMousePos = None
 		self.scrollPos = [0, 0]
 		self.maxPos = [0, 0, 0, 0]
+
+		super().__init__(gui, pos, **kwargs)
+
+	def initWidgets(self):
+		pos = self.getRealPos()
+		self.subGui = Sub_gui(self.gui, pos, size=list(self.kwargs["size"]))
 
 	def addSubWidget(self, widgetName, widgetType, pos, *widgetArgs, **widgetKwargs):
 		if widgetName in self.subWidgets:
@@ -1519,6 +1433,11 @@ class Scrollable_group(Menu_widget):
 
 		super().onEvent(event)
 
+		if event.type in (MOUSEMOTION, MOUSEBUTTONUP, MOUSEBUTTONDOWN):
+			x, y = event.pos
+			wx, wy = self.getRealPos()
+			event.pos = (x + wx, y + wy)
+
 	def scroll(self, vel):
 		x, y = self.scrollPos
 		vx, vy = vel
@@ -1569,3 +1488,100 @@ class Scrollable_group(Menu_widget):
 		super().update()
 		self.drawNavBars()
 		self.subGui.update()
+
+
+class Editable_text(Scrollable_group):
+
+	DEFAULT_KWARGS = {
+		"backgroundImage": join(Path.IMAGES, "editable_text", "{theme_color}.png"),
+		"backgroundBorderSize": 16,
+		"hintText": "",
+		"hintTextColor": (150, 150, 150, 255),
+		"text": "",
+		"textColor": (255, 255, 255, 255),
+		"fontSize": 20,
+		"font": join(Path.IMAGES, "font.ttf"),
+		"bold": False,
+		"wide": False,
+		"italic": False,
+		"underline": False,
+		"enable": True,
+		"cursorColor": (255, 255, 255, 255),
+		"cursorWidth": 2
+	}
+
+	def __init__(self, gui, pos, **kwargs):
+		Editable_text.updateDefaultKwargs(kwargs)
+		super().__init__(gui, pos, **kwargs)
+
+		self.is_typing = False
+
+	def initWidgets(self):
+		super().initWidgets()
+		w, h = self.kwargs["size"]
+		self.addSubWidget("text", Text, (w*0.05, h*0.5), self.kwargs["hintText"], anchor=(-1, 0), textColor=self.kwargs["hintTextColor"], \
+			fontSize=self.kwargs["fontSize"], font=self.kwargs["font"], bold=self.kwargs["bold"], wide=self.kwargs["wide"], \
+			italic=self.kwargs["italic"], underline=self.kwargs["underline"])
+
+	def onClick(self):
+		self.is_typing = True
+		#request_keyboard()
+
+	def onClickOut(self):
+		self.is_typing = False
+		#close_keyboard()
+
+	def onEvent(self, event):
+		super().onEvent(event)
+
+		special_keys = (K_LSHIFT, K_RSHIFT, K_PAUSE, K_DELETE, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_HOME, K_END, K_PAGEUP, K_PAGEDOWN, \
+			K_NUMLOCK, K_CAPSLOCK, K_SCROLLOCK, K_RCTRL, K_LCTRL, K_LALT, K_RALT, K_LSUPER, K_RSUPER, K_MODE, K_HELP, K_PRINT, \
+			K_SYSREQ, K_BREAK, K_MENU, K_POWER, K_EURO)
+
+		if event.type == MOUSEBUTTONDOWN:
+			if event.button == 1:
+				if self.isInWidget(event.pos):
+					self.onClick()
+				else:
+					self.onClickOut()
+
+		elif event.type == KEYDOWN:
+			if self.is_typing:
+				if event.key in (K_RETURN, K_ESCAPE):
+					self.is_typing = False
+					#close_keyboard()
+				elif event.key == K_BACKSPACE:
+					self.kwargs["text"] = self.kwargs["text"][:-1]
+				elif event.key not in special_keys:
+					self.kwargs["text"] += event.unicode
+
+	def drawCursor(self):
+		if self.is_typing:
+			x, y = self.subWidgets["text"].getRealPos()
+			wx, wy = self.getRealPos()
+
+			if self.kwargs["text"]:
+				w, h = self.subWidgets["text"].kwargs["size"]
+			else:
+				w = 0
+				h = self.kwargs["fontSize"]
+			x += wx
+			y += wy
+			y -= (self.kwargs["fontSize"] - h) // 2
+			self.gui.draw_line(self.kwargs["cursorColor"], (x + w, y), (x + w, y + self.kwargs["fontSize"]), \
+				width=self.kwargs["cursorWidth"])
+
+	def update(self):
+		if self.kwargs["text"]:
+			self.subWidgets["text"].text = self.kwargs["text"]
+			self.subWidgets["text"].config(textColor=self.kwargs["textColor"])
+		elif not self.is_typing:
+			self.subWidgets["text"].text = self.kwargs["hintText"]
+			self.subWidgets["text"].config(textColor=self.kwargs["hintTextColor"])
+		else:
+			self.subWidgets["text"].text = ""
+		self.drawCursor()
+		super().update()
+
+	def getText(self):
+		return self.kwargs["text"]

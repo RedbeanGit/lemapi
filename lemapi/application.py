@@ -65,6 +65,9 @@ class Application(object):
 			return c
 		return False
 
+	def get_real_name(self):
+		return os.path.split(self.path)[-1]
+
 	def get_name(self):
 		return self.infos.get("name", "unknownApp")
 
@@ -107,6 +110,14 @@ class Application(object):
 
 	def kill(self):
 		stop_all_activities()
+
+	def uninstall(self):
+		if os.path.exists(self.path):
+			for root, dirs, files in os.walk(self.path, topdown=False):
+				for name in files:
+					os.remove(os.path.join(root, name))
+				for name in dirs:
+					os.rmdir(os.path.join(root, name))
 
 	@staticmethod
 	def get_local_apps():
